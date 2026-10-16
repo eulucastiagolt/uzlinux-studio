@@ -1,0 +1,518 @@
+import { Button, Slider, LineEdit, ComboBox, ScrollView } from "std-widgets.slint";
+
+export struct KeyItem {
+    id: int,
+    col: int,
+    row: int,
+    pos_str: string,
+    title: string,
+    action_type: string,
+    action_value: string,
+    icon_path: string,
+    is_pressed: bool,
+    is_selected: bool,
+}
+
+// Custom Deck Key Button Component
+component DeckKeyButton inherits Rectangle {
+    in property <KeyItem> key_data;
+    callback clicked;
+
+    width: 86px;
+    height: 86px;
+    border-radius: 12px;
+    background: key_data.is_pressed ? #1e3a8a :
+                key_data.is_selected ? #2563eb :
+                touch.has-hover ? #334155 : #1e293b;
+    border-width: key_data.is_selected ? 2px : 1px;
+    border-color: key_data.is_pressed ? #60a5fa :
+                  key_data.is_selected ? #3b82f6 : #475569;
+
+    touch := TouchArea {
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    VerticalLayout {
+        padding: 6px;
+        spacing: 4px;
+        alignment: space-between;
+
+        // Position badge
+        HorizontalLayout {
+            alignment: space-between;
+            Text {
+                text: "[" + key_data.pos_str + "]";
+                font-size: 10px;
+                color: key_data.is_selected ? #bfdbfe : #64748b;
+            }
+            if key_data.action_type != "":
+                Rectangle {
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 3px;
+                    background: #38bdf8;
+                }
+        }
+
+        // Title or Action
+        VerticalLayout {
+            alignment: center;
+            Text {
+                text: key_data.title != "" ? key_data.title :
+                      key_data.action_value != "" ? key_data.action_value :
+                      "Vazio";
+                font-size: 11px;
+                font-weight: 600;
+                color: key_data.is_selected ? #ffffff : #f1f5f9;
+                horizontal-alignment: center;
+                overflow: elide;
+            }
+            if key_data.action_type != "":
+                Text {
+                    text: key_data.action_type;
+                    font-size: 9px;
+                    color: #94a3b8;
+                    horizontal-alignment: center;
+                }
+        }
+
+        // Indicator when physically pressed
+        Rectangle {
+            height: 3px;
+            border-radius: 1px;
+            background: key_data.is_pressed ? #38bdf8 : transparent;
+        }
+    }
+}
+
+// Action type toggle button
+component ActionTypeButton inherits Rectangle {
+    in property <string> label;
+    in property <bool> active: false;
+    callback clicked;
+
+    height: 28px;
+    horizontal-stretch: 1;
+    border-radius: 6px;
+    background: active ? #2563eb : (touch.has-hover ? #334155 : #1e293b);
+    border-width: 1px;
+    border-color: active ? #3b82f6 : #475569;
+
+    touch := TouchArea {
+        clicked => { root.clicked(); }
+    }
+
+    Text {
+        text: root.label;
+        font-size: 11px;
+        font-weight: active ? 700 : 500;
+        color: active ? white : #cbd5e1;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+}
+
+export component AppWindow inherits Window {
+    title: "Uzlinux Studio - Ulanzi Deck Companion";
+    preferred-width: 980px;
+    preferred-height: 680px;
+    min-width: 860px;
+    min-height: 580px;
+    background: #18191c;
+    default-font-family: "sans-serif";
+
+    in-out property <bool> device_connected: false;
+    in-out property <string> device_model: "Ulanzi D200H";
+    in-out property <string> device_node: "/dev/hidraw0";
+    in-out property <int> brightness_val: 70;
+    in-out property <int> sleep_val: 300;
+    in-out property <string> status_message: "Pronto";
+
+    // 15 keys model
+    in-out property <[KeyItem]> keys: [];
+    in-out property <int> selected_key_index: 0;
+
+    // Selected key editable fields
+    in-out property <string> edit_title: "";
+    in-out property <string> edit_action_type: "app";
+    in-out property <string> edit_action_value: "";
+    in-out property <string> edit_icon_path: "";
+
+    // Public method to update pressed state
+    public function set_key_pressed(idx: int, pressed: bool) {
+        if (idx >= 0 && idx < root.keys.length) {
+            root.keys[idx].is_pressed = pressed;
+        }
+    }
+
+    // Callbacks to Rust
+    callback key_selected(int);
+    callback save_key_action(int, string, string, string, string, string);
+    callback brightness_changed(int);
+    callback sleep_changed(int);
+    callback send_key_image_to_deck(int);
+    callback refresh_connection();
+
+    VerticalLayout {
+        padding: 16px;
+        spacing: 14px;
+
+        // TOP HEADER
+        Rectangle {
+            height: 64px;
+            background: #202227;
+            border-radius: 10px;
+            border-width: 1px;
+            border-color: #2e323b;
+
+            HorizontalLayout {
+                padding-left: 20px;
+                padding-right: 20px;
+                spacing: 20px;
+                alignment: space-between;
+
+                // Logo and title
+                HorizontalLayout {
+                    spacing: 12px;
+                    alignment: start;
+
+                    Rectangle {
+                        width: 38px;
+                        height: 38px;
+                        border-radius: 8px;
+                        background: #3b82f6;
+
+                        Text {
+                            text: "UZ";
+                            font-weight: 800;
+                            font-size: 16px;
+                            color: white;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                        }
+                    }
+
+                    VerticalLayout {
+                        alignment: center;
+                        spacing: 2px;
+
+                        Text {
+                            text: "Uzlinux Studio";
+                            font-size: 17px;
+                            font-weight: 700;
+                            color: #f1f5f9;
+                        }
+
+                        HorizontalLayout {
+                            spacing: 8px;
+                            alignment: start;
+
+                            Rectangle {
+                                width: 8px;
+                                height: 8px;
+                                border-radius: 4px;
+                                background: root.device_connected ? #22c55e : #ef4444;
+                                y: 3px;
+                            }
+
+                            Text {
+                                text: root.device_connected ? (root.device_model + " Conectado (" + root.device_node + ")") : "Dispositivo Desconectado";
+                                font-size: 12px;
+                                color: root.device_connected ? #86efac : #fca5a5;
+                            }
+                        }
+                    }
+                }
+
+                // Controls (Brightness, Reconnect)
+                HorizontalLayout {
+                    spacing: 20px;
+                    alignment: end;
+
+                    HorizontalLayout {
+                        spacing: 8px;
+                        alignment: center;
+
+                        Text {
+                            text: "Brilho:";
+                            color: #94a3b8;
+                            font-size: 13px;
+                            vertical-alignment: center;
+                        }
+
+                        Slider {
+                            width: 120px;
+                            minimum: 0;
+                            maximum: 100;
+                            value: root.brightness_val;
+                            changed(val) => {
+                                root.brightness_val = Math.round(val);
+                                root.brightness_changed(root.brightness_val);
+                            }
+                        }
+
+                        Text {
+                            text: root.brightness_val + "%";
+                            color: #f1f5f9;
+                            font-size: 13px;
+                            width: 36px;
+                            vertical-alignment: center;
+                        }
+                    }
+
+                    Button {
+                        text: "Reconectar";
+                        clicked => {
+                            root.refresh_connection();
+                        }
+                    }
+                }
+            }
+        }
+
+        // MAIN CONTENT AREA: LEFT (5x3 GRID) + RIGHT (INSPECTOR)
+        HorizontalLayout {
+            spacing: 16px;
+
+            // 5x3 DECK PAD VIEW
+            Rectangle {
+                horizontal-stretch: 3;
+                background: #202227;
+                border-radius: 10px;
+                border-width: 1px;
+                border-color: #2e323b;
+
+                VerticalLayout {
+                    padding: 16px;
+                    spacing: 12px;
+
+                    HorizontalLayout {
+                        alignment: space-between;
+                        Text {
+                            text: "Teclas do Ulanzi Deck (Grade 5x3)";
+                            font-size: 15px;
+                            font-weight: 600;
+                            color: #cbd5e1;
+                        }
+                        Text {
+                            text: "Clique em uma tecla para configurar";
+                            font-size: 12px;
+                            color: #64748b;
+                        }
+                    }
+
+                    // 5x3 Keys Grid
+                    VerticalLayout {
+                        spacing: 10px;
+                        alignment: center;
+
+                        // Row 0
+                        HorizontalLayout {
+                            spacing: 10px;
+                            alignment: center;
+                            for key in [root.keys[0], root.keys[1], root.keys[2], root.keys[3], root.keys[4]]:
+                                DeckKeyButton {
+                                    key_data: key;
+                                    clicked => {
+                                        root.key_selected(key.id);
+                                    }
+                                }
+                        }
+
+                        // Row 1
+                        HorizontalLayout {
+                            spacing: 10px;
+                            alignment: center;
+                            for key in [root.keys[5], root.keys[6], root.keys[7], root.keys[8], root.keys[9]]:
+                                DeckKeyButton {
+                                    key_data: key;
+                                    clicked => {
+                                        root.key_selected(key.id);
+                                    }
+                                }
+                        }
+
+                        // Row 2
+                        HorizontalLayout {
+                            spacing: 10px;
+                            alignment: center;
+                            for key in [root.keys[10], root.keys[11], root.keys[12], root.keys[13], root.keys[14]]:
+                                DeckKeyButton {
+                                    key_data: key;
+                                    clicked => {
+                                        root.key_selected(key.id);
+                                    }
+                                }
+                        }
+                    }
+                }
+            }
+
+            // RIGHT INSPECTOR PANEL
+            Rectangle {
+                horizontal-stretch: 2;
+                background: #202227;
+                border-radius: 10px;
+                border-width: 1px;
+                border-color: #2e323b;
+
+                VerticalLayout {
+                    padding: 16px;
+                    spacing: 12px;
+
+                    Text {
+                        text: "Configuração da Tecla " + root.keys[root.selected_key_index].pos_str;
+                        font-size: 16px;
+                        font-weight: 700;
+                        color: #f8fafc;
+                    }
+
+                    Rectangle {
+                        height: 1px;
+                        background: #334155;
+                    }
+
+                    // Label / Title
+                    VerticalLayout {
+                        spacing: 4px;
+                        Text { text: "Rótulo / Título:"; color: #94a3b8; font-size: 12px; }
+                        LineEdit {
+                            text: root.edit_title;
+                            placeholder-text: "Nome da tecla (ex: Abrir Navegador)";
+                            edited(txt) => { root.edit_title = txt; }
+                        }
+                    }
+
+                    // Action Type Selector
+                    VerticalLayout {
+                        spacing: 4px;
+                        Text { text: "Tipo de Ação:"; color: #94a3b8; font-size: 12px; }
+                        HorizontalLayout {
+                            spacing: 6px;
+                            ActionTypeButton {
+                                label: "App";
+                                active: root.edit_action_type == "app";
+                                clicked => { root.edit_action_type = "app"; }
+                            }
+                            ActionTypeButton {
+                                label: "URL";
+                                active: root.edit_action_type == "website";
+                                clicked => { root.edit_action_type == "website"; }
+                            }
+                            ActionTypeButton {
+                                label: "Atalho";
+                                active: root.edit_action_type == "hotkey";
+                                clicked => { root.edit_action_type == "hotkey"; }
+                            }
+                            ActionTypeButton {
+                                label: "Mídia";
+                                active: root.edit_action_type == "media";
+                                clicked => { root.edit_action_type == "media"; }
+                            }
+                            ActionTypeButton {
+                                label: "Texto";
+                                active: root.edit_action_type == "text";
+                                clicked => { root.edit_action_type == "text"; }
+                            }
+                        }
+                    }
+
+                    // Action Value Input with context hints
+                    VerticalLayout {
+                        spacing: 4px;
+                        Text {
+                            text: root.edit_action_type == "app" ? "Comando ou Executável (ex: firefox, kitty, code):" :
+                                  root.edit_action_type == "website" ? "URL do Site (ex: https://youtube.com):" :
+                                  root.edit_action_type == "hotkey" ? "Teclas (ex: ctrl+c, alt+tab, super):" :
+                                  root.edit_action_type == "media" ? "Comando de Mídia (playpause, next, prev, volup, voldown, mute):" :
+                                  "Texto a digitar:";
+                            color: #94a3b8;
+                            font-size: 12px;
+                        }
+                        LineEdit {
+                            text: root.edit_action_value;
+                            placeholder-text: root.edit_action_type == "app" ? "firefox" :
+                                              root.edit_action_type == "website" ? "https://youtube.com" :
+                                              root.edit_action_type == "hotkey" ? "ctrl+c" :
+                                              root.edit_action_type == "media" ? "playpause" :
+                                              "Olá Mundo!";
+                            edited(txt) => { root.edit_action_value = txt; }
+                        }
+                    }
+
+                    // Icon Path
+                    VerticalLayout {
+                        spacing: 4px;
+                        Text { text: "Caminho do Ícone (PNG / JPEG):"; color: #94a3b8; font-size: 12px; }
+                        LineEdit {
+                            text: root.edit_icon_path;
+                            placeholder-text: "/caminho/para/imagem.jpg";
+                            edited(txt) => { root.edit_icon_path = txt; }
+                        }
+                    }
+
+                    // Action Buttons
+                    HorizontalLayout {
+                        spacing: 8px;
+                        alignment: end;
+
+                        Button {
+                            text: "Enviar ao Deck";
+                            clicked => {
+                                root.send_key_image_to_deck(root.selected_key_index);
+                            }
+                        }
+
+                        Button {
+                            text: "Salvar Tecla";
+                            clicked => {
+                                root.save_key_action(
+                                    root.selected_key_index,
+                                    root.keys[root.selected_key_index].pos_str,
+                                    root.edit_title,
+                                    root.edit_action_type,
+                                    root.edit_action_value,
+                                    root.edit_icon_path
+                                );
+                            }
+                        }
+                    }
+
+                    // Spacer
+                    Rectangle {}
+                }
+            }
+        }
+
+        // FOOTER STATUS BAR
+        Rectangle {
+            height: 32px;
+            background: #202227;
+            border-radius: 6px;
+            border-width: 1px;
+            border-color: #2e323b;
+
+            HorizontalLayout {
+                padding-left: 12px;
+                padding-right: 12px;
+                alignment: space-between;
+
+                Text {
+                    text: root.status_message;
+                    font-size: 12px;
+                    color: #94a3b8;
+                    vertical-alignment: center;
+                }
+
+                Text {
+                    text: "Uzlinux Studio v0.1.0 • Rust + Slint";
+                    font-size: 11px;
+                    color: #475569;
+                    vertical-alignment: center;
+                }
+            }
+        }
+    }
+}
