@@ -60,13 +60,24 @@ O projeto foi construído através de **engenharia reversa** do aplicativo origi
 - Rust toolchain (`rustc`, `cargo`)
 - Acesso de leitura/escrita em `/dev/hidraw0` (já configurado por padrão para o usuário no sistema)
 
-### Compilação e Execução
+### Compilação e Execução Normal
 ```bash
 cd /home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudio
+
+# Versão de desenvolvimento
+cargo run
+
+# Versão otimizada (Release)
 cargo run --release
 ```
 
-Para executar a versão de desenvolvimento:
+### ⚡ Modo Watch (Auto-Reload / Live Development)
+Para testar e alterar o código sem precisar recompilar manualmente a cada alteração:
 ```bash
-cargo run
+cargo dev
 ```
+ou simplesmente:
+```bash
+./dev.sh
+```
+*(Monitora alterações em `src/`, `ui/`, `Cargo.toml` e `build.rs`, recompila em poucos segundos e reinicia o aplicativo automaticamente).*

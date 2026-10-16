@@ -1,0 +1,2 @@
+[alias]
+dev = "watch -c -w src -w ui -w Cargo.toml -w build.rs -x run"
