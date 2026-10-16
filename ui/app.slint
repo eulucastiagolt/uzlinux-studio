@@ -15,6 +15,14 @@ export struct KeyItem {
     is_selected: bool,
 }
 
+export struct SystemAppItem {
+    name: string,
+    exec_cmd: string,
+    icon_path: string,
+    has_icon: bool,
+    icon: image,
+}
+
 // Custom Deck Key Button Component
 component DeckKeyButton inherits Rectangle {
     in property <KeyItem> key_data;
@@ -161,6 +169,11 @@ export component AppWindow inherits Window {
         }
     }
 
+    // App picker properties & state
+    in-out property <bool> show_app_picker: false;
+    in-out property <string> app_filter_text: "";
+    in-out property <[SystemAppItem]> filtered_apps: [];
+
     // Callbacks to Rust
     callback key_selected(int);
     callback save_key_action(int, string, string, string, string, string);
@@ -173,6 +186,12 @@ export component AppWindow inherits Window {
     callback browse_icon_ulanzi();
     callback clear_key_icon();
     callback icon_path_edited(string);
+    callback open_app_picker();
+    callback close_app_picker();
+    callback app_filter_changed(string);
+    callback app_selected(string, string, string);
+    callback browse_app_binary();
+    callback browse_command_script();
 
     VerticalLayout {
         padding: 16px;
@@ -409,40 +428,46 @@ export component AppWindow inherits Window {
                         spacing: 4px;
                         Text { text: "Tipo de Ação:"; color: #94a3b8; font-size: 12px; }
                         HorizontalLayout {
-                            spacing: 6px;
+                            spacing: 5px;
                             ActionTypeButton {
                                 label: "App";
                                 active: root.edit_action_type == "app";
                                 clicked => { root.edit_action_type = "app"; }
                             }
                             ActionTypeButton {
+                                label: "Comando";
+                                active: root.edit_action_type == "command";
+                                clicked => { root.edit_action_type = "command"; }
+                            }
+                            ActionTypeButton {
                                 label: "URL";
                                 active: root.edit_action_type == "website";
-                                clicked => { root.edit_action_type == "website"; }
+                                clicked => { root.edit_action_type = "website"; }
                             }
                             ActionTypeButton {
                                 label: "Atalho";
                                 active: root.edit_action_type == "hotkey";
-                                clicked => { root.edit_action_type == "hotkey"; }
+                                clicked => { root.edit_action_type = "hotkey"; }
                             }
                             ActionTypeButton {
                                 label: "Mídia";
                                 active: root.edit_action_type == "media";
-                                clicked => { root.edit_action_type == "media"; }
+                                clicked => { root.edit_action_type = "media"; }
                             }
                             ActionTypeButton {
                                 label: "Texto";
                                 active: root.edit_action_type == "text";
-                                clicked => { root.edit_action_type == "text"; }
+                                clicked => { root.edit_action_type = "text"; }
                             }
                         }
                     }
 
                     // Action Value Input with context hints
                     VerticalLayout {
-                        spacing: 4px;
+                        spacing: 5px;
                         Text {
-                            text: root.edit_action_type == "app" ? "Comando ou Executável (ex: firefox, kitty, code):" :
+                            text: root.edit_action_type == "app" ? "Aplicativo Instalado ou Executável:" :
+                                  root.edit_action_type == "command" ? "Comando Linux / Shell Script customizado:" :
                                   root.edit_action_type == "website" ? "URL do Site (ex: https://youtube.com):" :
                                   root.edit_action_type == "hotkey" ? "Teclas (ex: ctrl+c, alt+tab, super):" :
                                   root.edit_action_type == "media" ? "Comando de Mídia (playpause, next, prev, volup, voldown, mute):" :
@@ -452,12 +477,33 @@ export component AppWindow inherits Window {
                         }
                         LineEdit {
                             text: root.edit_action_value;
-                            placeholder-text: root.edit_action_type == "app" ? "firefox" :
+                            placeholder-text: root.edit_action_type == "app" ? "firefox ou clique em 'Escolher App'..." :
+                                              root.edit_action_type == "command" ? "pactl set-sink-mute @DEFAULT_SINK@ toggle" :
                                               root.edit_action_type == "website" ? "https://youtube.com" :
                                               root.edit_action_type == "hotkey" ? "ctrl+c" :
                                               root.edit_action_type == "media" ? "playpause" :
                                               "Olá Mundo!";
                             edited(txt) => { root.edit_action_value = txt; }
+                        }
+
+                        if root.edit_action_type == "app": HorizontalLayout {
+                            spacing: 6px;
+                            Button {
+                                text: "📱 Escolher App do Sistema...";
+                                clicked => { root.open_app_picker(); }
+                            }
+                            Button {
+                                text: "📂 Binário (/usr/bin)...";
+                                clicked => { root.browse_app_binary(); }
+                            }
+                        }
+
+                        if root.edit_action_type == "command": HorizontalLayout {
+                            spacing: 6px;
+                            Button {
+                                text: "📂 Selecionar Script (.sh)...";
+                                clicked => { root.browse_command_script(); }
+                            }
                         }
                     }
 
@@ -596,6 +642,126 @@ export component AppWindow inherits Window {
                     font-size: 11px;
                     color: #475569;
                     vertical-alignment: center;
+                }
+            }
+        }
+    }
+
+    // MODAL APP PICKER OVERLAY
+    if root.show_app_picker: Rectangle {
+        width: 100%;
+        height: 100%;
+        background: #000000cc;
+
+        TouchArea {} // Blocks clicks through to main UI
+
+        Rectangle {
+            width: Math.min(root.width - 60px, 720px);
+            height: Math.min(root.height - 60px, 540px);
+            background: #1b1e26;
+            border-radius: 12px;
+            border-width: 1px;
+            border-color: #3b82f6;
+
+            VerticalLayout {
+                padding: 18px;
+                spacing: 12px;
+
+                HorizontalLayout {
+                    alignment: space-between;
+                    Text {
+                        text: "📱 Aplicativos Instalados no Sistema";
+                        font-size: 16px;
+                        font-weight: 700;
+                        color: #f8fafc;
+                        vertical-alignment: center;
+                    }
+                    Button {
+                        text: "✕ Fechar";
+                        clicked => { root.close_app_picker(); }
+                    }
+                }
+
+                LineEdit {
+                    text: root.app_filter_text;
+                    placeholder-text: "🔍 Filtrar aplicativo por nome ou comando (ex: firefox, steam, terminal)...";
+                    edited(txt) => {
+                        root.app_filter_text = txt;
+                        root.app_filter_changed(txt);
+                    }
+                }
+
+                Text {
+                    text: "Clique no aplicativo para preencher o executável, título e ícone:";
+                    font-size: 11px;
+                    color: #94a3b8;
+                }
+
+                ScrollView {
+                    VerticalLayout {
+                        spacing: 4px;
+                        for item in root.filtered_apps: Rectangle {
+                            height: 50px;
+                            border-radius: 8px;
+                            background: item_touch.has-hover ? #2e384d : #232731;
+                            border-width: 1px;
+                            border-color: item_touch.has-hover ? #60a5fa : #374151;
+
+                            item_touch := TouchArea {
+                                clicked => {
+                                    root.app_selected(item.name, item.exec_cmd, item.icon_path);
+                                }
+                            }
+
+                            HorizontalLayout {
+                                padding-left: 12px;
+                                padding-right: 12px;
+                                spacing: 12px;
+                                alignment: start;
+
+                                Rectangle {
+                                    width: 34px;
+                                    height: 34px;
+                                    border-radius: 6px;
+                                    background: #11141a;
+                                    y: 8px;
+
+                                    if item.has_icon: Image {
+                                        source: item.icon;
+                                        width: 28px;
+                                        height: 28px;
+                                        image-fit: contain;
+                                        horizontal-alignment: center;
+                                        vertical-alignment: center;
+                                    }
+                                    if !item.has_icon: Text {
+                                        text: "📱";
+                                        font-size: 16px;
+                                        horizontal-alignment: center;
+                                        vertical-alignment: center;
+                                    }
+                                }
+
+                                VerticalLayout {
+                                    alignment: center;
+                                    spacing: 2px;
+
+                                    Text {
+                                        text: item.name;
+                                        font-size: 13px;
+                                        font-weight: 600;
+                                        color: #f1f5f9;
+                                    }
+                                    Text {
+                                        text: item.exec_cmd;
+                                        font-size: 11px;
+                                        color: #94a3b8;
+                                        overflow: elide;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

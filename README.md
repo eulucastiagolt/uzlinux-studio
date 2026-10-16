@@ -11,15 +11,15 @@ O projeto foi construído através de **engenharia reversa** do aplicativo origi
 - **Interface Moderna em Slint**: Grade visual 5x3 fiel ao hardware físico, com tema escuro e visualização instantânea de estado.
 - **Feedback em Tempo Real**: Animação na interface ao pressionar qualquer botão físico no hardware.
 - **Ações Configuráveis**:
-  - **Aplicativos**: Execução de binários ou comandos do sistema (ex: `firefox`, `kitty`, `code`, `steam`, `discord`).
+  - **Aplicativos**: Seletor visual integrado de **aplicativos instalados no sistema** com pesquisa em tempo real, auto-preenchimento de executável e ícone, além de seletor de binários em `/usr/bin`.
+  - **Comandos Linux customizados**: Nova ação dedicada **Comando** para execução de comandos shell, pipelines, utilitários de sistema (ex: `pactl`, `systemctl suspend`, `brightnessctl`) e scripts `.sh`.
   - **Websites / URLs**: Abertura no navegador padrão via `open::that`.
   - **Atalhos / Teclas de Atalho**: Simulação de teclas via `xdotool` e `ydotool` (compatível com X11 e Wayland).
   - **Controle Multimídia**: Play/Pause, Próxima, Anterior, Aumentar Volume, Diminuir Volume, Mudo (via D-Bus MPRIS e teclas multimídia XF86).
   - **Digitação de Texto**: Macros de digitação de texto instantâneo.
-- **Controle de Hardware**:
-  - Slider de brilho de 0% a 100% transmitido em tempo real para a tela do Deck.
-  - Temporizador de suspensão / sleep time.
-  - Envio de imagens e ícones para as teclas do LCD.
+- **Navegador e Envio de Ícones**:
+  - Navegação por imagens customizadas, ícones do sistema (`/usr/share/pixmaps` e `/usr/share/icons`) e coleção extraída oficial da Ulanzi.
+  - Conversão inteligente de SVG para raster e redimensionamento automático para **196x196 JPEG RGB baseline** com envio instantâneo ao LCD físico do Deck.
 - **Perfis Persistentes**: Configurações salvas automaticamente em formato JSON em `~/.config/uzlinux-studio/profile.json`.
 - **Auto-detecção USB HID**: Conexão automática com `/dev/hidraw*` sem necessidade de configurações manuais.
 

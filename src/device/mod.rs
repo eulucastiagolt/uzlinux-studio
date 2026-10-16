@@ -171,7 +171,30 @@ impl UlanziDeck {
         self.send_packet(&packet)
     }
 
-    /// Sends an image to the deck LCD
+    /// Sends an icon / image to a specific key slot (0 to 14)
+    pub fn send_key_image(&self, slot: u8, image_bytes: &[u8]) -> Result<(), String> {
+        let mut payload = Vec::with_capacity(1 + image_bytes.len());
+        payload.push(slot);
+        payload.extend_from_slice(image_bytes);
+        let packet = protocol::build_packet(
+            protocol::PROTOCOL_HOST_CMD,
+            protocol::CMD_SEND_IMAGE_SLOT,
+            &payload,
+        );
+        self.send_packet(&packet)
+    }
+
+    /// Sends raw screen data to the deck LCD
+    pub fn send_screen_data(&self, image_bytes: &[u8]) -> Result<(), String> {
+        let packet = protocol::build_packet(
+            protocol::PROTOCOL_HOST_CMD,
+            protocol::CMD_SEND_SCREEN_DATA,
+            image_bytes,
+        );
+        self.send_packet(&packet)
+    }
+
+    /// Sends a general image packet to the deck LCD with a custom command code
     pub fn send_image(&self, cmd: u8, image_bytes: &[u8]) -> Result<(), String> {
         let packet = protocol::build_packet(protocol::PROTOCOL_HOST_CMD, cmd, image_bytes);
         self.send_packet(&packet)

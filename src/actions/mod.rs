@@ -17,6 +17,13 @@ pub fn execute_action(action_type: &str, action_value: &str) {
                 .arg(format!("{} &", act_val))
                 .spawn();
         }
+        "command" | "comando" | "cmd" | "shell" | "script" => {
+            println!("[Action] Executando Comando Linux: {}", act_val);
+            let _ = Command::new("sh")
+                .arg("-c")
+                .arg(&act_val)
+                .spawn();
+        }
         "website" | "url" => {
             let url = if !act_val.starts_with("http://") && !act_val.starts_with("https://") {
                 format!("https://{}", act_val)
