@@ -2,6 +2,7 @@ mod actions;
 mod config;
 mod device;
 
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::mpsc;
 use std::time::Duration;
@@ -13,6 +14,61 @@ use crate::device::{DeckEvent, UlanziDeck};
 
 slint::include_modules!();
 
+/// Helper to load a Slint image from a file path
+fn load_slint_image(path_str: &str) -> (bool, slint::Image) {
+    if path_str.trim().is_empty() {
+        return (false, slint::Image::default());
+    }
+    let p = Path::new(path_str);
+    if p.exists() {
+        if let Ok(img) = slint::Image::load_from_path(p) {
+            return (true, img);
+        }
+    }
+    (false, slint::Image::default())
+}
+
+/// Helper to open a file dialog in a separate thread
+fn open_file_dialog(
+    initial_dir: Option<PathBuf>,
+    title: &str,
+    ui_weak: slint::Weak<AppWindow>,
+) {
+    let title_owned = title.to_string();
+    std::thread::spawn(move || {
+        let mut dialog = rfd::FileDialog::new()
+            .set_title(&title_owned)
+            .add_filter("Imagens / Ícones", &["png", "jpg", "jpeg", "svg", "webp", "ico", "bmp"]);
+
+        if let Some(dir) = initial_dir {
+            if dir.exists() {
+                dialog = dialog.set_directory(dir);
+            }
+        }
+
+        if let Some(path) = dialog.pick_file() {
+            let path_str = path.to_string_lossy().to_string();
+            let file_name = path
+                .file_name()
+                .map(|f| f.to_string_lossy().to_string())
+                .unwrap_or_else(|| path_str.clone());
+
+            let _ = slint::invoke_from_event_loop(move || {
+                if let Some(ui) = ui_weak.upgrade() {
+                    ui.set_edit_icon_path(SharedString::from(&path_str));
+                    let (has_icon, img) = load_slint_image(&path_str);
+                    ui.set_edit_has_icon(has_icon);
+                    ui.set_edit_icon_preview(img);
+                    ui.set_status_message(SharedString::from(format!(
+                        "Ícone selecionado: {}",
+                        file_name
+                    )));
+                }
+            });
+        }
+    });
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let main_window = AppWindow::new()?;
     let ui_weak = main_window.as_weak();
@@ -23,6 +79,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Populate keys in the Slint Model
     let keys_model = Rc::new(VecModel::<KeyItem>::default());
     for k in &profile.keys {
+        let (has_icon, icon) = load_slint_image(&k.icon_path);
         keys_model.push(KeyItem {
             id: k.id as i32,
             col: k.col as i32,
@@ -32,6 +89,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             action_type: SharedString::from(&k.action_type),
             action_value: SharedString::from(&k.action_value),
             icon_path: SharedString::from(&k.icon_path),
+            has_icon,
+            icon,
             is_pressed: false,
             is_selected: k.id == 0,
         });
@@ -47,6 +106,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         main_window.set_edit_action_type(SharedString::from(&first_key.action_type));
         main_window.set_edit_action_value(SharedString::from(&first_key.action_value));
         main_window.set_edit_icon_path(SharedString::from(&first_key.icon_path));
+        let (has_icon, img) = load_slint_image(&first_key.icon_path);
+        main_window.set_edit_has_icon(has_icon);
+        main_window.set_edit_icon_preview(img);
     }
 
     // Initialize Ulanzi Deck Hardware Controller
@@ -92,11 +154,73 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             ui.set_edit_action_type(item.action_type.clone());
                             ui.set_edit_action_value(item.action_value.clone());
                             ui.set_edit_icon_path(item.icon_path.clone());
+                            let (has_icon, img) = load_slint_image(item.icon_path.as_str());
+                            ui.set_edit_has_icon(has_icon);
+                            ui.set_edit_icon_preview(img);
                         }
                         keys_model.set_row_data(i, item);
                     }
                 }
             }
+        });
+    }
+
+    // Direct text editing of icon path
+    {
+        let ui_handle = ui_weak.clone();
+        main_window.on_icon_path_edited(move |txt| {
+            if let Some(ui) = ui_handle.upgrade() {
+                let (has_icon, img) = load_slint_image(txt.as_str());
+                ui.set_edit_has_icon(has_icon);
+                ui.set_edit_icon_preview(img);
+            }
+        });
+    }
+
+    // Clear key icon
+    {
+        let ui_handle = ui_weak.clone();
+        main_window.on_clear_key_icon(move || {
+            if let Some(ui) = ui_handle.upgrade() {
+                ui.set_edit_icon_path(SharedString::default());
+                ui.set_edit_has_icon(false);
+                ui.set_edit_icon_preview(slint::Image::default());
+                ui.set_status_message(SharedString::from("Ícone removido da tecla"));
+            }
+        });
+    }
+
+    // Browse Custom File
+    {
+        let ui_handle = ui_weak.clone();
+        main_window.on_browse_icon_custom(move || {
+            let initial = dirs::picture_dir().or_else(dirs::home_dir);
+            open_file_dialog(initial, "Selecionar Ícone / Imagem Customizada", ui_handle.clone());
+        });
+    }
+
+    // Browse System Icons
+    {
+        let ui_handle = ui_weak.clone();
+        main_window.on_browse_icon_system(move || {
+            let initial = if Path::new("/usr/share/pixmaps").exists() {
+                Some(PathBuf::from("/usr/share/pixmaps"))
+            } else if Path::new("/usr/share/icons").exists() {
+                Some(PathBuf::from("/usr/share/icons"))
+            } else {
+                dirs::home_dir()
+            };
+            open_file_dialog(initial, "Selecionar Ícone do Sistema (/usr/share)", ui_handle.clone());
+        });
+    }
+
+    // Browse Ulanzi Extracted Icons
+    {
+        let ui_handle = ui_weak.clone();
+        main_window.on_browse_icon_ulanzi(move || {
+            let mut ulanzi_dir = dirs::config_dir().unwrap_or_else(|| PathBuf::from("."));
+            ulanzi_dir.push("uzlinux-studio/icons/ulanzi_defaults");
+            open_file_dialog(Some(ulanzi_dir), "Selecionar Ícone da Ulanzi", ui_handle.clone());
         });
     }
 
@@ -114,11 +238,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 profile_clone.keys[id_usize].icon_path = icon_path.to_string();
                 profile_clone.save();
 
+                let (has_icon, img) = load_slint_image(icon_path.as_str());
+
                 if let Some(mut item) = keys_model.row_data(id_usize) {
                     item.title = title.clone();
                     item.action_type = act_type.clone();
                     item.action_value = act_val.clone();
                     item.icon_path = icon_path.clone();
+                    item.has_icon = has_icon;
+                    item.icon = img;
                     keys_model.set_row_data(id_usize, item);
                 }
 
@@ -174,7 +302,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     }
                 } else if let Some(ui) = ui_handle.upgrade() {
                     ui.set_status_message(SharedString::from(
-                        "Informe um caminho de imagem antes de enviar ao Deck"
+                        "Informe ou selecione um ícone antes de enviar ao Deck"
                     ));
                 }
             }

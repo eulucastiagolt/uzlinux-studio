@@ -9,6 +9,8 @@ export struct KeyItem {
     action_type: string,
     action_value: string,
     icon_path: string,
+    has_icon: bool,
+    icon: image,
     is_pressed: bool,
     is_selected: bool,
 }
@@ -35,8 +37,8 @@ component DeckKeyButton inherits Rectangle {
     }
 
     VerticalLayout {
-        padding: 6px;
-        spacing: 4px;
+        padding: 5px;
+        spacing: 2px;
         alignment: space-between;
 
         // Position badge
@@ -56,20 +58,30 @@ component DeckKeyButton inherits Rectangle {
                 }
         }
 
-        // Title or Action
+        // Center: Icon + Label
         VerticalLayout {
             alignment: center;
+            spacing: 2px;
+
+            if key_data.has_icon: Image {
+                source: key_data.icon;
+                width: 38px;
+                height: 38px;
+                image-fit: contain;
+                horizontal-alignment: center;
+            }
+
             Text {
                 text: key_data.title != "" ? key_data.title :
                       key_data.action_value != "" ? key_data.action_value :
                       "Vazio";
-                font-size: 11px;
+                font-size: key_data.has_icon ? 9px : 11px;
                 font-weight: 600;
                 color: key_data.is_selected ? #ffffff : #f1f5f9;
                 horizontal-alignment: center;
                 overflow: elide;
             }
-            if key_data.action_type != "":
+            if key_data.action_type != "" && !key_data.has_icon:
                 Text {
                     text: key_data.action_type;
                     font-size: 9px;
@@ -139,6 +151,8 @@ export component AppWindow inherits Window {
     in-out property <string> edit_action_type: "app";
     in-out property <string> edit_action_value: "";
     in-out property <string> edit_icon_path: "";
+    in-out property <bool> edit_has_icon: false;
+    in-out property <image> edit_icon_preview;
 
     // Public method to update pressed state
     public function set_key_pressed(idx: int, pressed: bool) {
@@ -154,6 +168,11 @@ export component AppWindow inherits Window {
     callback sleep_changed(int);
     callback send_key_image_to_deck(int);
     callback refresh_connection();
+    callback browse_icon_custom();
+    callback browse_icon_system();
+    callback browse_icon_ulanzi();
+    callback clear_key_icon();
+    callback icon_path_edited(string);
 
     VerticalLayout {
         padding: 16px;
@@ -442,14 +461,80 @@ export component AppWindow inherits Window {
                         }
                     }
 
-                    // Icon Path
+                    // Icon Path & Browser Section
                     VerticalLayout {
-                        spacing: 4px;
-                        Text { text: "Caminho do Ícone (PNG / JPEG):"; color: #94a3b8; font-size: 12px; }
-                        LineEdit {
-                            text: root.edit_icon_path;
-                            placeholder-text: "/caminho/para/imagem.jpg";
-                            edited(txt) => { root.edit_icon_path = txt; }
+                        spacing: 6px;
+                        Text { text: "Ícone da Tecla:"; color: #94a3b8; font-size: 12px; font-weight: 600; }
+
+                        HorizontalLayout {
+                            spacing: 10px;
+                            alignment: start;
+
+                            // Preview box
+                            Rectangle {
+                                width: 56px;
+                                height: 56px;
+                                border-radius: 8px;
+                                background: #111827;
+                                border-width: 1px;
+                                border-color: root.edit_has_icon ? #3b82f6 : #374151;
+
+                                if root.edit_has_icon: Image {
+                                    source: root.edit_icon_preview;
+                                    width: 44px;
+                                    height: 44px;
+                                    image-fit: contain;
+                                    horizontal-alignment: center;
+                                    vertical-alignment: center;
+                                }
+
+                                if !root.edit_has_icon: Text {
+                                    text: "Sem\nÍcone";
+                                    font-size: 10px;
+                                    color: #64748b;
+                                    horizontal-alignment: center;
+                                    vertical-alignment: center;
+                                }
+                            }
+
+                            // Path input and action buttons
+                            VerticalLayout {
+                                spacing: 6px;
+                                horizontal-stretch: 1;
+
+                                LineEdit {
+                                    text: root.edit_icon_path;
+                                    placeholder-text: "Caminho da imagem (.png, .jpg)...";
+                                    edited(txt) => {
+                                        root.edit_icon_path = txt;
+                                        root.icon_path_edited(txt);
+                                    }
+                                }
+
+                                HorizontalLayout {
+                                    spacing: 5px;
+
+                                    Button {
+                                        text: "📂 Arquivo...";
+                                        clicked => { root.browse_icon_custom(); }
+                                    }
+
+                                    Button {
+                                        text: "🐧 Sistema";
+                                        clicked => { root.browse_icon_system(); }
+                                    }
+
+                                    Button {
+                                        text: "🎨 Ulanzi";
+                                        clicked => { root.browse_icon_ulanzi(); }
+                                    }
+
+                                    if root.edit_has_icon: Button {
+                                        text: "✕";
+                                        clicked => { root.clear_key_icon(); }
+                                    }
+                                }
+                            }
                         }
                     }
 
