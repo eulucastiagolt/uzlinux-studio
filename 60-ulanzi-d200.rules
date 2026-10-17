@@ -1,0 +1,9 @@
+# Ulanzi D200 / D200X / D200H Stream Controller Udev Rules
+# Grants non-root users access to the device node via systemd uaccess
+
+# Operational Composite HID interface (Rockchip 2207:0019)
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="2207", ATTRS{idProduct}=="0019", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="2207", ATTRS{idProduct}=="0019", MODE="0660", TAG+="uaccess"
+
+# Ulanzi D200 Recovery/ADB Mode (Google/Zkswe 18d1:d002)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="18d1", ATTRS{idProduct}=="d002", MODE="0660", TAG+="uaccess"

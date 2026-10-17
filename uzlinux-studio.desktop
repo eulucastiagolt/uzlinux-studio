@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Uzlinux Studio
+GenericName=Ulanzi Deck Controller
+Comment=Controle e personalização nativa do Ulanzi D200 Stream Deck no Linux
+Exec=uzlinux-studio
+Icon=uzlinux-studio
+Terminal=false
+Type=Application
+Categories=Utility;AudioVideo;HardwareSettings;
+Keywords=ulanzi;deck;streamdeck;d200;macro;controller;
+StartupNotify=true
