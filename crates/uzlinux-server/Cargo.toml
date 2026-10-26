@@ -1,0 +1,25 @@
+[package]
+name = "uzlinux-server"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+uzlinux-core.workspace = true
+uzlinux-protocol.workspace = true
+tokio.workspace = true
+tokio-tungstenite.workspace = true
+futures.workspace = true
+futures-util.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+dashmap.workspace = true
+tiny_http.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+log.workspace = true
+urlencoding.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

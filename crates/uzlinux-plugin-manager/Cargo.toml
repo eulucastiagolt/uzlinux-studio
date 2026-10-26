@@ -1,0 +1,23 @@
+[package]
+name = "uzlinux-plugin-manager"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+uzlinux-core.workspace = true
+uzlinux-protocol.workspace = true
+uzlinux-server.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+dashmap.workspace = true
+zip.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+log.workspace = true
+which = "7.0"
+
+[dev-dependencies]
+tempfile.workspace = true

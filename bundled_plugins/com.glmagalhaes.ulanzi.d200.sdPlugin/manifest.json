@@ -1,0 +1,24 @@
+{
+  "Name": "Ulanzi D200",
+  "Description": "Device support plugin for the Ulanzi Stream Controller D200 and D200H",
+  "Author": "glmagalhaes, mquest, mtesseract",
+  "Version": "0.6.5",
+  "PluginUUID": "com.glmagalhaes.ulanzi.d200",
+  "CodePathLin": "rs-ulanzi-d200-linux",
+  "Icon": "assets/icon",
+  "Category": "Ulanzi D200",
+  "OS": [
+    { "Platform": "linux" }
+  ],
+  "Actions": [
+    {
+      "UUID": "com.glmagalhaes.ulanzi.d200.cycle",
+      "Name": "Screen Switch",
+      "Icon": "assets/cycle",
+      "Tooltip": "Switch modes of the status screen.",
+      "Controllers": ["Keypad"],
+      "States": [{ "Image": "assets/cycle" }]
+    }
+  ],
+  "DeviceNamespace": "e9"
+}

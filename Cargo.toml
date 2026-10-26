@@ -1,0 +1,58 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/uzlinux-core",
+    "crates/uzlinux-protocol",
+    "crates/uzlinux-server",
+    "crates/uzlinux-plugin-manager",
+    "crates/uzlinux-device-driver",
+    "crates/uzlinux-renderer",
+    "crates/uzlinux-window-watcher",
+    "crates/uzlinux-app",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Lucas Tiago", "Uzlinux Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/eulucastiagolt/uzlinux-studio"
+description = "Estação nativa em Rust para Stream Controllers, otimizada para produtos Ulanzi com compatibilidade com o ecossistema OpenDeck e Stream Deck"
+
+[workspace.dependencies]
+tokio = { version = "1.49", features = ["full"] }
+tokio-tungstenite = "0.28"
+futures = "0.3"
+futures-util = "0.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_with = "3.16"
+dashmap = "6.1"
+anyhow = "1.0"
+thiserror = "2.0"
+log = "0.4"
+env_logger = "0.11"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.16", features = ["v4", "serde"] }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "bmp", "ico", "webp"] }
+tiny_http = "0.12"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+zip = { version = "2.2", default-features = false, features = ["deflate"] }
+sysinfo = "0.33"
+urlencoding = "2.1"
+base64 = "0.22"
+path-slash = "0.2"
+active-win-pos-rs = "0.10"
+dirs = "6.0"
+tempfile = "3.18"
+open = "5.3"
+libc = "0.2"
+
+# Internal crates
+uzlinux-core = { path = "crates/uzlinux-core" }
+uzlinux-protocol = { path = "crates/uzlinux-protocol" }
+uzlinux-server = { path = "crates/uzlinux-server" }
+uzlinux-plugin-manager = { path = "crates/uzlinux-plugin-manager" }
+uzlinux-device-driver = { path = "crates/uzlinux-device-driver" }
+uzlinux-renderer = { path = "crates/uzlinux-renderer" }
+uzlinux-window-watcher = { path = "crates/uzlinux-window-watcher" }

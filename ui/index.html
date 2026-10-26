@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Uzlinux Studio - Ulanzi D200</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-brand">
+        <div class="logo-icon">🎛️</div>
+        <div class="logo-text">
+          <h1>Uzlinux Studio</h1>
+          <span class="version-tag">v0.1.0 (Rust Core)</span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="control-group device-control-group">
+          <label for="device-select" title="Dispositivo Selecionado">📟 Disp:</label>
+          <select id="device-select" class="dropdown dropdown-compact"></select>
+        </div>
+
+        <div class="control-group">
+          <label>Perfil:</label>
+          <div class="profile-actions-wrapper">
+            <select id="profile-select" class="dropdown"></select>
+            <button id="btn-new-profile" class="btn-icon" title="Novo Perfil">➕</button>
+            <button id="btn-rename-profile" class="btn-icon" title="Renomear Perfil">✏️</button>
+            <button id="btn-delete-profile" class="btn-icon danger" title="Excluir Perfil">🗑️</button>
+            <button id="btn-auto-profile" class="btn-icon" title="Perfis Automáticos por Aplicativo (Troca Automática)">🔀</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <button id="btn-plugins" class="btn secondary">🧩 Plugins</button>
+        <button id="btn-settings" class="btn secondary">⚙️ Configurações</button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+      <!-- Left: Actions Palette -->
+      <aside class="sidebar-palette">
+        <div class="palette-header">
+          <h2>Biblioteca de Ações</h2>
+          <input type="text" id="action-search" class="search-input" placeholder="Buscar ações...">
+        </div>
+        <div id="categories-list" class="categories-list">
+          <!-- Populated by JS -->
+        </div>
+      </aside>
+
+      <!-- Center: Device Grid -->
+      <section class="deck-workspace">
+        <div class="deck-chassis">
+          <div class="deck-info-bar">
+            <span id="active-device-name">Ulanzi Stream Controller D200</span>
+            <span class="deck-badge" id="grid-dimensions-badge">Grade 3 × 5 (14 Teclas - Ulanzi D200)</span>
+          </div>
+
+          <div id="keys-grid" class="keys-grid grid-3x5">
+            <!-- Populated by JS -->
+          </div>
+
+          <div class="deck-footer-hint">
+            💡 <span>Dica: Arraste uma ação para o grid, ou arraste teclas entre si para mover ou trocar posições.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Inspector Panel -->
+      <aside class="sidebar-inspector">
+        <div class="inspector-header">
+          <h2>Inspetor de Propriedades</h2>
+          <span id="selected-key-badge" class="badge">Nenhuma tecla selecionada</span>
+        </div>
+
+        <div id="inspector-content" class="inspector-content">
+          <div class="inspector-empty">
+            <div class="empty-icon">🖱️</div>
+            <p>Selecione uma tecla na grade ao lado para editar o título, imagem ou abrir as opções do plugin.</p>
+          </div>
+
+          <div id="inspector-form" class="inspector-form" style="display: none;">
+            <div class="form-group">
+              <label>Nome da Ação</label>
+              <div id="insp-action-name" class="static-val">-</div>
+            </div>
+
+            <div class="form-group">
+              <label>Plugin Responsável</label>
+              <div id="insp-action-plugin" class="static-val code">-</div>
+            </div>
+
+            <div class="form-group">
+              <label for="insp-title-input">Título Exibido</label>
+              <input type="text" id="insp-title-input" class="text-input" placeholder="Digite o texto...">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label for="insp-color-input">Cor do Texto</label>
+                <input type="color" id="insp-color-input" class="color-input" value="#FFFFFF">
+              </div>
+              <div class="form-group half">
+                <label for="insp-size-input">Tamanho da Fonte</label>
+                <input type="number" id="insp-size-input" class="number-input" min="8" max="36" value="16">
+              </div>
+            </div>
+
+            <!-- Custom Icon Section for all actions -->
+            <div class="form-group icon-customization-group" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+              <label style="display: flex; justify-content: space-between; align-items: center; font-weight: 600; margin-bottom: 6px;">
+                <span>🖼️ Ícone da Ação</span>
+                <span id="insp-state-badge" class="badge" style="font-size: 10px; display: none;">Estado 0</span>
+              </label>
+
+              <!-- State selector if action has multiple states -->
+              <div id="insp-states-wrapper" style="display: none; margin-bottom: 8px;">
+                <label for="insp-state-select" style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">Estado da Tecla:</label>
+                <select id="insp-state-select" class="select-input" style="padding: 4px 8px; font-size: 12px; width: 100%;"></select>
+              </div>
+
+              <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
+                <div id="insp-icon-preview-box" style="width: 54px; height: 54px; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); position: relative; cursor: pointer;" title="Clique ou arraste uma imagem aqui para alterar o ícone">
+                  <img id="insp-icon-preview-img" src="" alt="Icon" style="max-width: 100%; max-height: 100%; object-fit: contain; display: none; pointer-events: none;">
+                  <span id="insp-icon-preview-fallback" style="font-size: 22px; color: var(--text-muted);">🔲</span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
+                  <div style="display: flex; gap: 6px;">
+                    <button type="button" id="btn-insp-upload-icon" class="btn secondary btn-sm" style="flex: 1; padding: 6px 8px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Carregar imagem do seu computador (PNG, SVG, JPG, WEBP, GIF, BMP)">
+                      📁 Escolher Imagem
+                    </button>
+                    <button type="button" id="btn-insp-pick-system" class="btn secondary btn-sm" style="padding: 6px 8px; font-size: 11px; display: flex; align-items: center; gap: 4px;" title="Escolher ícone de aplicativo instalado no sistema">
+                      🔍 Sistema
+                    </button>
+                  </div>
+                  <button type="button" id="btn-insp-reset-icon" class="btn btn-sm" style="padding: 2px 0; font-size: 11px; align-self: flex-start; background: none; border: none; cursor: pointer; color: var(--danger, #f38ba8); text-decoration: underline;" title="Restaurar ícone original padrão desta ação">
+                    ↺ Restaurar Ícone Padrão
+                  </button>
+                </div>
+              </div>
+
+              <!-- Hidden file input for uploading custom icon -->
+              <input type="file" id="insp-icon-file-input" accept="image/png,image/jpeg,image/svg+xml,image/webp,image/gif,image/bmp" style="display: none;">
+
+              <!-- Image Scale & Show Title toggle -->
+              <div class="form-row" style="margin-top: 10px; align-items: center;">
+                <div class="form-group half" style="margin-bottom: 0;">
+                  <label for="insp-icon-scale" style="font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span>Tamanho:</span>
+                    <span id="insp-icon-scale-val">100%</span>
+                  </label>
+                  <input type="range" id="insp-icon-scale" min="20" max="100" step="5" value="100" style="width: 100%; cursor: pointer;">
+                </div>
+                <div class="form-group half" style="margin-bottom: 0; display: flex; align-items: center; justify-content: flex-start; padding-top: 14px;">
+                  <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; cursor: pointer; user-select: none;">
+                    <input type="checkbox" id="insp-show-title-check" checked style="cursor: pointer;">
+                    <span>Exibir Título</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="inspector-actions">
+              <button id="btn-test-key" class="btn primary">⚡ Testar Clique</button>
+              <button id="btn-clear-key" class="btn danger">🗑️ Limpar Tecla</button>
+            </div>
+
+            <!-- Native Action Config Panel -->
+            <div id="native-pi-wrapper" style="display: none; margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+              <label id="native-pi-title" style="font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 8px; display: block;">Configurações da Ação:</label>
+              
+              <!-- For Launch App -->
+              <div id="native-pi-launchapp" class="form-group" style="display: none;">
+                <label>Aplicativo a Executar:</label>
+                <div id="native-selected-app-card" class="selected-app-card" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 8px;">
+                  <div id="native-selected-app-icon" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 16px; border-radius: 4px; background: rgba(0,0,0,0.25); flex-shrink: 0;">🚀</div>
+                  <div style="flex: 1; min-width: 0;">
+                    <div id="native-selected-app-name" style="font-weight: 600; font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Nenhum aplicativo selecionado</div>
+                    <div id="native-selected-app-exec" style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Clique no botão abaixo para escolher</div>
+                  </div>
+                </div>
+                <button id="btn-open-app-selector" type="button" class="btn secondary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                  <span>🔍</span> Selecionar Aplicativo...
+                </button>
+                <div style="margin-top: 10px;">
+                  <label>Argumentos Adicionais (opcional):</label>
+                  <input type="text" id="native-app-args" class="text-input" placeholder="ex: --incognito" style="width: 100%;">
+                </div>
+              </div>
+
+              <!-- For Open URL -->
+              <div id="native-pi-openurl" class="form-group" style="display: none;">
+                <label>Endereço URL / Site:</label>
+                <input type="text" id="native-url-input" class="text-input" placeholder="https://youtube.com" style="width: 100%;">
+              </div>
+
+              <!-- For Shell Command -->
+              <div id="native-pi-command" class="form-group" style="display: none;">
+                <label>Comando Shell (Bash):</label>
+                <input type="text" id="native-cmd-input" class="text-input" placeholder="notify-send 'Deck Ativado!'" style="width: 100%;">
+              </div>
+
+              <!-- For Switch Profile -->
+              <div id="native-pi-profile" class="form-group" style="display: none;">
+                <label>Perfil de Destino:</label>
+                <select id="native-profile-select" class="dropdown" style="width: 100%;"></select>
+              </div>
+
+              <!-- For Device Brightness -->
+              <div id="native-pi-brightness" class="form-group" style="display: none;">
+                <label>Ação de Brilho:</label>
+                <select id="native-bright-action" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="set">Definir Brilho Exato (%)</option>
+                  <option value="increase">Aumentar Brilho (+)</option>
+                  <option value="decrease">Diminuir Brilho (-)</option>
+                </select>
+                <label>Valor (<span id="native-bright-val-display">50</span>%):</label>
+                <input type="range" id="native-bright-slider" min="0" max="100" value="50" style="width: 100%;">
+              </div>
+
+              <!-- For Input Simulation -->
+              <div id="native-pi-simulateinput" class="form-group" style="display: none;">
+                <label>Ao Pressionar Tecla (Key Down):</label>
+                <input type="text" id="native-sim-down" class="text-input" placeholder='ex: [k(ctrl,c)] ou [t("meu texto")]' style="width: 100%; font-family: monospace; font-size: 12px; margin-bottom: 8px;">
+                <label>Ao Soltar Tecla (Key Up - opcional):</label>
+                <input type="text" id="native-sim-up" class="text-input" placeholder='ex: [k(ctrl,v)]' style="width: 100%; font-family: monospace; font-size: 12px;">
+                <small style="display: block; margin-top: 6px; color: var(--text-muted); font-size: 11px;">
+                  💡 Exemplos: <code>[t("olá!")]</code>, <code>[k(ctrl,p)]</code>, <code>[k(f5)]</code>, <code>[b(l)]</code>, <code>[m(10,10,r)]</code>
+                </small>
+              </div>
+
+              <!-- PipeWire Master Volume -->
+              <div id="native-pi-pw-master" class="form-group" style="display: none;">
+                <label style="font-weight: 600; color: #fff; margin-bottom: 6px; display: block;">🔊 Volume Master (Sistema)</label>
+                <label for="native-pw-master-dir">Ação do Botão:</label>
+                <select id="native-pw-master-dir" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="up">🔊 Aumentar Volume (+)</option>
+                  <option value="down">🔉 Diminuir Volume (-)</option>
+                  <option value="mute">🔇 Alternar Mudo (Mute/Unmute)</option>
+                </select>
+                <label>Passo de Volume (<span id="native-pw-master-step-val">5</span>%):</label>
+                <input type="range" id="native-pw-master-step" min="1" max="20" step="1" value="5" style="width: 100%;">
+              </div>
+
+              <!-- PipeWire Microphone Volume -->
+              <div id="native-pi-pw-mic" class="form-group" style="display: none;">
+                <label style="font-weight: 600; color: #fff; margin-bottom: 6px; display: block;">🎤 Volume do Microfone Padrão</label>
+                <label for="native-pw-mic-dir">Ação do Botão:</label>
+                <select id="native-pw-mic-dir" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="up">🎤 Aumentar Microfone (+)</option>
+                  <option value="down">🔉 Diminuir Microfone (-)</option>
+                  <option value="mute">🔇 Mutar / Desmutar Microfone</option>
+                </select>
+                <label>Passo de Volume (<span id="native-pw-mic-step-val">5</span>%):</label>
+                <input type="range" id="native-pw-mic-step" min="1" max="20" step="1" value="5" style="width: 100%;">
+              </div>
+
+              <!-- PipeWire Specific Output Device Volume -->
+              <div id="native-pi-pw-output" class="form-group" style="display: none;">
+                <label style="font-weight: 600; color: #fff; margin-bottom: 6px; display: block;">🎧 Volume de Saída Específica</label>
+                <label for="native-pw-output-select">Dispositivo de Saída:</label>
+                <select id="native-pw-output-select" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="">Carregando dispositivos...</option>
+                </select>
+                <label for="native-pw-output-dir">Ação do Botão:</label>
+                <select id="native-pw-output-dir" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="up">🔊 Aumentar Volume (+)</option>
+                  <option value="down">🔉 Diminuir Volume (-)</option>
+                  <option value="mute">🔇 Alternar Mudo</option>
+                </select>
+                <label>Passo de Volume (<span id="native-pw-output-step-val">5</span>%):</label>
+                <input type="range" id="native-pw-output-step" min="1" max="20" step="1" value="5" style="width: 100%;">
+              </div>
+
+              <!-- PipeWire Specific Input Device Volume -->
+              <div id="native-pi-pw-input" class="form-group" style="display: none;">
+                <label style="font-weight: 600; color: #fff; margin-bottom: 6px; display: block;">🎙️ Volume de Entrada Específica</label>
+                <label for="native-pw-input-select">Dispositivo de Entrada (Microfone):</label>
+                <select id="native-pw-input-select" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="">Carregando microfones...</option>
+                </select>
+                <label for="native-pw-input-dir">Ação do Botão:</label>
+                <select id="native-pw-input-dir" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="up">🎤 Aumentar Volume (+)</option>
+                  <option value="down">🔉 Diminuir Volume (-)</option>
+                  <option value="mute">🔇 Mutar / Desmutar</option>
+                </select>
+                <label>Passo de Volume (<span id="native-pw-input-step-val">5</span>%):</label>
+                <input type="range" id="native-pw-input-step" min="1" max="20" step="1" value="5" style="width: 100%;">
+              </div>
+
+              <!-- PipeWire App Volume -->
+              <div id="native-pi-pw-app" class="form-group" style="display: none;">
+                <label style="font-weight: 600; color: #fff; margin-bottom: 6px; display: block;">🎵 Volume de Aplicativo</label>
+                <label for="native-pw-app-select">Aplicativo com Áudio:</label>
+                <select id="native-pw-app-select" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="">Carregando aplicativos...</option>
+                </select>
+                <label for="native-pw-app-dir">Ação do Botão:</label>
+                <select id="native-pw-app-dir" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="up">🔊 Aumentar Volume do App (+)</option>
+                  <option value="down">🔉 Diminuir Volume do App (-)</option>
+                  <option value="mute">🔇 Mutar / Desmutar App</option>
+                </select>
+                <label>Passo de Volume (<span id="native-pw-app-step-val">5</span>%):</label>
+                <input type="range" id="native-pw-app-step" min="1" max="20" step="1" value="5" style="width: 100%;">
+              </div>
+
+              <!-- Switch Output Device (PipeWire) -->
+              <div id="native-pi-pw-switchoutput" class="form-group" style="display: none;">
+                <label style="font-weight: 600; color: #fff; margin-bottom: 6px; display: block;">🎧 Alternar Dispositivo de Saída</label>
+                <label for="native-pw-switchoutput-select">Dispositivo de Saída Alvo:</label>
+                <select id="native-pw-switchoutput-select" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="cycle">🔄 Alternar ciclicamente entre todos os dispositivos</option>
+                </select>
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; margin-top: 4px;">
+                  <span style="display: block; font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+                    💡 Selecione um dispositivo específico para ativá-lo diretamente com esta tecla, ou selecione "Alternar ciclicamente" para alternar entre todas as saídas a cada clique.
+                  </span>
+                </div>
+              </div>
+
+              <!-- Switch Input Device (PipeWire) -->
+              <div id="native-pi-pw-switchinput" class="form-group" style="display: none;">
+                <label style="font-weight: 600; color: #fff; margin-bottom: 6px; display: block;">🎙️ Alternar Dispositivo de Entrada</label>
+                <label for="native-pw-switchinput-select">Microfone / Entrada Alvo:</label>
+                <select id="native-pw-switchinput-select" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="cycle">🔄 Alternar ciclicamente entre todos os microfones</option>
+                </select>
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; margin-top: 4px;">
+                  <span style="display: block; font-size: 11px; color: var(--text-muted); line-height: 1.4;">
+                    💡 Selecione um microfone específico para ativá-lo diretamente, ou use "Alternar ciclicamente" para trocar entre microfones conectados.
+                  </span>
+                </div>
+              </div>
+
+              <!-- Push to Talk -->
+              <div id="native-pi-pw-ptt" class="form-group" style="display: none;">
+                <label style="font-weight: 600; color: #fff; margin-bottom: 6px; display: block;">📻 Push to Talk (Pressione para Falar)</label>
+                <label for="native-pw-ptt-select">Microfone Alvo:</label>
+                <select id="native-pw-ptt-select" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="@DEFAULT_AUDIO_SOURCE@">Microfone Padrão do Sistema</option>
+                </select>
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; margin-top: 6px;">
+                  <span style="display: block; font-size: 12px; color: var(--text-muted); line-height: 1.4;">
+                    O microfone é mantido mudo e será <strong>desmutado apenas enquanto você mantiver esta tecla pressionada</strong> no deck. Ao soltar, volta automaticamente ao mudo.
+                  </span>
+                </div>
+              </div>
+
+              <!-- For Native Media Settings (MPRIS) -->
+              <div id="native-pi-media" class="form-group" style="display: none;">
+                <label for="native-media-cmd">Comando de Mídia:</label>
+                <select id="native-media-cmd" class="dropdown" style="width: 100%; margin-bottom: 8px;">
+                  <option value="PlayPause">⏯️ Play / Pause</option>
+                  <option value="Next">⏭️ Próxima Faixa</option>
+                  <option value="Previous">⏮️ Faixa Anterior</option>
+                  <option value="Stop">⏹️ Parar Reprodução</option>
+                  <option value="VolumeUp">🔊 Volume do Player (+5%)</option>
+                  <option value="VolumeDown">🔉 Volume do Player (-5%)</option>
+                  <option value="SeekForward">⏩ Avançar 10 segundos</option>
+                  <option value="SeekBackward">⏪ Retroceder 10 segundos</option>
+                  <option value="Shuffle">🔀 Alternar Aleatório</option>
+                  <option value="Repeat">🔁 Alternar Repetição</option>
+                </select>
+                <small style="display: block; color: var(--text-muted); font-size: 11px;">
+                  💡 Compatível nativamente com Spotify, YouTube, VLC e qualquer reprodutor MPRIS do Linux.
+                </small>
+              </div>
+            </div>
+
+            <div class="pi-frame-container" id="pi-frame-wrapper" style="display: none;">
+              <label>Painel do Plugin (Property Inspector):</label>
+              <iframe id="pi-iframe" class="pi-iframe" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card modal-card-wide">
+        <div class="modal-header">
+          <h2>Configurações do Uzlinux Studio</h2>
+          <button id="btn-close-settings" class="btn-icon">✖</button>
+        </div>
+
+        <!-- Settings Tabs -->
+        <div class="modal-tabs">
+          <button class="tab-btn active" data-tab="tab-general">⚙️ Geral & Hardware</button>
+          <button class="tab-btn" data-tab="tab-obs">🎥 OBS Studio</button>
+          <button class="tab-btn" data-tab="tab-settings-plugins">🧩 Gerenciar Plugins</button>
+          <button class="tab-btn" data-tab="tab-auto-profiles">🔀 Perfis Automáticos</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Tab 1: General & Hardware -->
+          <div id="tab-general" class="tab-pane active">
+            <div class="form-group" style="display: flex; gap: 10px; align-items: center; padding: 10px 14px; background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 16px;">
+              <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-right: 4px;">Status dos Serviços:</span>
+              <div class="status-pill online" id="status-hardware" title="Hardware USB Conectado">
+                <span class="status-dot"></span> Ulanzi D200
+              </div>
+              <div class="status-pill online" id="status-ws" title="Hub WebSocket Ativo">
+                <span class="status-dot"></span> Hub OK
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Brilho do Backlight (D200): <span id="brightness-val">21%</span></label>
+              <input type="range" id="brightness-slider" min="0" max="100" value="21" class="slider">
+            </div>
+            <div class="form-group">
+              <label>Tempo de Sleep por Inatividade (minutos):</label>
+              <input type="number" id="sleep-input" min="1" max="180" value="30" class="number-input">
+            </div>
+            <div class="form-group checkbox-row">
+              <input type="checkbox" id="check-background" checked>
+              <label for="check-background">Continuar executando em segundo plano (Bandeja / Tray)</label>
+            </div>
+            <div class="form-group checkbox-row">
+              <input type="checkbox" id="check-sleep-lock" checked>
+              <label for="check-sleep-lock">Desligar tela quando o computador estiver bloqueado</label>
+            </div>
+
+            <div class="form-group" style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 12px;">
+              <label>Importação do OpenDeck:</label>
+              <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+                Copie perfis, configurações e plugins do OpenDeck para a pasta isolada do Uzlinux Studio sem alterar os originais.
+              </p>
+              <button type="button" id="btn-import-opendeck-settings" class="btn secondary btn-sm">📥 Importar do OpenDeck</button>
+              <span id="import-settings-feedback" class="test-feedback" style="margin-left: 10px;"></span>
+            </div>
+          </div>
+
+          <!-- Tab 2: OBS Studio WebSocket -->
+          <div id="tab-obs" class="tab-pane">
+            <div class="obs-info-box">
+              <p>📡 Conecte o Uzlinux Studio ao <strong>OBS Studio</strong> através do <strong>OBS WebSocket v5</strong>.</p>
+              <span class="obs-info-hint">No OBS Studio, acesse: <em>Ferramentas > Configurações do servidor WebSocket</em> e certifique-se de que está ativado.</span>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group half">
+                <label>Host / Endereço IP:</label>
+                <input type="text" id="obs-ip" class="text-input" value="127.0.0.1" placeholder="127.0.0.1">
+              </div>
+              <div class="form-group half">
+                <label>Porta WebSocket:</label>
+                <input type="number" id="obs-port" class="number-input" value="4455" placeholder="4455">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Senha do WebSocket:</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="obs-pwd" class="text-input" placeholder="Senha configurada no OBS (se houver)">
+                <button type="button" id="btn-toggle-obs-pwd" class="btn-icon" title="Mostrar/Ocultar Senha">👁️</button>
+              </div>
+            </div>
+
+            <!-- OBS Secondary Instance (Optional) -->
+            <div class="form-group checkbox-row" style="margin-top: 14px;">
+              <input type="checkbox" id="check-obs-dual">
+              <label for="check-obs-dual">Configurar 2ª Instância do OBS (Dual PC / Backup)</label>
+            </div>
+
+            <div id="obs-dual-container" style="display: none; margin-top: 10px; padding-left: 12px; border-left: 2px solid var(--accent);">
+              <div class="form-row">
+                <div class="form-group half">
+                  <label>Host / IP (OBS 2):</label>
+                  <input type="text" id="obs-ip2" class="text-input" placeholder="192.168.1.100">
+                </div>
+                <div class="form-group half">
+                  <label>Porta (OBS 2):</label>
+                  <input type="number" id="obs-port2" class="number-input" value="4455" placeholder="4455">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Senha (OBS 2):</label>
+                <input type="password" id="obs-pwd2" class="text-input" placeholder="Senha do OBS 2">
+              </div>
+            </div>
+
+            <div class="obs-test-row" style="margin-top: 16px;">
+              <button type="button" id="btn-test-obs" class="btn secondary">🔌 Testar Conexão com OBS</button>
+              <span id="obs-test-feedback" class="test-feedback"></span>
+            </div>
+          </div>
+
+          <!-- Tab 3: Gerenciador de Plugins -->
+          <div id="tab-settings-plugins" class="tab-pane">
+            <div class="obs-info-box" style="margin-bottom: 12px;">
+              <p>🧩 Gerencie os plugins instalados no <strong>Uzlinux Studio</strong> ou importe do <strong>OpenDeck</strong>.</p>
+              <span class="obs-info-hint">A pasta de plugins fica isolada em <code>~/.config/uzlinux-studiodeck/plugins/</code>.</span>
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;">
+              <button type="button" id="btn-settings-open-full-manager" class="btn primary btn-sm">🧩 Abrir Gerenciador Completo</button>
+              <button type="button" id="btn-settings-open-plugins-dir" class="btn secondary btn-sm">📂 Abrir Pasta no Linux</button>
+              <button type="button" id="btn-settings-import-opendeck" class="btn secondary btn-sm">📥 Importar do OpenDeck</button>
+            </div>
+            <span id="settings-plugins-feedback" class="test-feedback" style="display: block; margin-bottom: 10px;"></span>
+            <div id="settings-plugins-loading" class="plugins-loading" style="display: none;">Carregando plugins...</div>
+            <div id="settings-plugins-list" class="plugins-cards-container">
+              <!-- Populated dynamically via JS -->
+            </div>
+          </div>
+
+          <!-- Tab 4: Perfis Automáticos por Aplicativo -->
+          <div id="tab-auto-profiles" class="tab-pane">
+            <div class="obs-info-box" style="margin-bottom: 14px;">
+              <p>🔀 <strong>Troca Automática de Perfil por Aplicativo</strong></p>
+              <span class="obs-info-hint">
+                O deck alterna automaticamente de perfil quando você abre ou foca em um aplicativo vinculado (ex: mudar para o perfil <strong>Live</strong> ao focar no OBS Studio, ou <strong>Player</strong> ao abrir o VLC/Spotify).
+              </span>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 16px;">
+              <label style="font-weight: 600; font-size: 13px; color: #fff; margin-bottom: 10px; display: block;">➕ Adicionar Novo Vínculo:</label>
+              
+              <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 220px;">
+                  <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Aplicativo do Sistema / Identificador:</label>
+                  <div style="display: flex; gap: 6px;">
+                    <input type="text" id="auto-profile-app-input" class="text-input" placeholder="ex: com.obsproject.Studio ou vlc" style="flex: 1;">
+                    <button type="button" id="btn-auto-profile-pick-app" class="btn secondary btn-sm" title="Escolher Aplicativo Instalado">🔍 Escolher</button>
+                  </div>
+                </div>
+
+                <div style="width: 170px;">
+                  <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Perfil de Destino:</label>
+                  <select id="auto-profile-target-select" class="dropdown" style="width: 100%;"></select>
+                </div>
+
+                <div>
+                  <button type="button" id="btn-save-auto-profile" class="btn primary btn-sm" style="height: 36px; padding: 0 16px;">💾 Vincular</button>
+                </div>
+              </div>
+              <div id="auto-profile-feedback" class="test-feedback" style="margin-top: 8px; font-size: 11px; display: none;"></div>
+            </div>
+
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <label style="font-weight: 600; font-size: 13px; color: #fff;">Vínculos Configurados neste Dispositivo:</label>
+                <span id="auto-profiles-count" style="font-size: 11px; color: var(--text-muted);"></span>
+              </div>
+              <div id="auto-profiles-list" class="auto-profiles-list" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px;">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-save-settings" class="btn primary">Salvar Todas as Configurações</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Plugins Manager Modal -->
+    <div id="plugins-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <div class="modal-title-with-actions">
+            <h2>🧩 Gerenciador de Plugins</h2>
+            <div class="plugins-header-actions">
+              <button id="btn-refresh-plugins" class="btn secondary btn-sm" title="Recarregar Lista">🔄 Atualizar</button>
+              <button id="btn-import-opendeck-plugins" class="btn secondary btn-sm" title="Importar do OpenDeck">📥 Importar OpenDeck</button>
+              <button id="btn-open-plugins-dir" class="btn secondary btn-sm" title="Abrir pasta de plugins no sistema">📂 Abrir Pasta</button>
+              <button id="btn-install-plugin-trigger" class="btn primary btn-sm" title="Instalar arquivo .sdPlugin ou .zip">📥 Instalar Plugin</button>
+              <input type="file" id="plugin-file-input" accept=".zip,.streamDeckPlugin,.sdPlugin" style="display: none;">
+            </div>
+          </div>
+          <button id="btn-close-plugins-modal" class="btn-icon">✖</button>
+        </div>
+
+        <div class="modal-body plugins-body">
+          <div id="plugins-feedback" class="plugins-feedback" style="display: none;"></div>
+          <div id="plugins-loading" class="plugins-loading">Carregando plugins instalados...</div>
+          <div id="plugins-list" class="plugins-cards-container">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Seleção de Aplicativos do Sistema -->
+    <div id="app-selector-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card modal-large" style="max-width: 580px; width: 92%; max-height: 82vh;">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px;">🚀</span>
+            <h2 style="margin: 0; font-size: 15px;">Selecionar Aplicativo do Sistema</h2>
+          </div>
+          <button id="btn-close-app-selector" class="btn-icon">✖</button>
+        </div>
+        <div class="modal-body" style="padding: 0; margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0;">
+          <div style="position: relative;">
+            <input type="text" id="app-selector-search" class="text-input" placeholder="Buscar aplicativo por nome, comando ou descrição..." style="width: 100%; padding-left: 36px; box-sizing: border-box;" autocomplete="off">
+            <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.6; pointer-events: none;">🔍</span>
+          </div>
+          <div id="app-selector-count" style="font-size: 11px; color: var(--text-muted); padding: 0 4px;"></div>
+          <div id="app-selector-list" class="app-selector-list" style="overflow-y: auto; flex: 1; max-height: 380px; display: flex; flex-direction: column; gap: 4px; padding-right: 4px;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+        <div class="modal-footer" style="padding-top: 10px; border-top: 1px solid var(--border-color);">
+          <button id="btn-cancel-app-selector" class="btn secondary">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Importação do OpenDeck (Tudo ou Separadamente) -->
+    <div id="opendeck-import-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content modal-large" style="max-width: 660px; width: 92%; max-height: 88vh; display: flex; flex-direction: column;">
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 20px;">📥</span>
+            <h2 style="margin: 0; font-size: 16px;">Importação do OpenDeck</h2>
+          </div>
+          <button id="btn-close-opendeck-import-modal" class="btn-icon">✖</button>
+        </div>
+
+        <div class="modal-body" style="flex: 1; overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 14px;">
+          <div class="obs-info-box" style="margin-bottom: 0;">
+            <p>Escolha o que deseja importar do <strong>OpenDeck</strong> para o <strong>Uzlinux Studio</strong>. Os arquivos originais do OpenDeck permanecem intactos.</p>
+            <div id="od-location-info" style="font-size: 11px; margin-top: 4px; color: var(--text-muted);">
+              Detectando instalação...
+            </div>
+          </div>
+
+          <div id="od-import-loading" style="text-align: center; padding: 24px; color: var(--text-muted); display: none;">
+            ⏳ Analisando dados do OpenDeck...
+          </div>
+
+          <div id="od-not-found" class="alert-box" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 12px; border-radius: 6px; font-size: 13px;">
+            ⚠️ Nenhuma instalação do OpenDeck foi localizada em <code>~/.var/app/me.amankhanna.opendeck</code> ou <code>~/.config/opendeck</code>.
+          </div>
+
+          <div id="od-content-wrapper" style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- Seção 1: Perfis -->
+            <div class="od-import-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; font-size: 13px;">
+                  <input type="checkbox" id="od-check-profiles" checked>
+                  <span>📁 Perfis de Dispositivos (<span id="od-profiles-count">0</span>)</span>
+                </label>
+                <div style="display: flex; gap: 8px; font-size: 11px;">
+                  <button type="button" id="btn-od-select-all-profiles" class="link-btn" style="background: none; border: none; color: var(--accent); cursor: pointer; text-decoration: underline;">Marcar todos</button>
+                  <button type="button" id="btn-od-unselect-all-profiles" class="link-btn" style="background: none; border: none; color: var(--text-muted); cursor: pointer; text-decoration: underline;">Desmarcar</button>
+                </div>
+              </div>
+              <div id="od-profiles-list" style="max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-left: 24px;">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+
+            <!-- Seção 2: Plugins -->
+            <div class="od-import-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer; font-size: 13px;">
+                  <input type="checkbox" id="od-check-plugins" checked>
+                  <span>🧩 Plugins (<span id="od-plugins-count">0</span>)</span>
+                </label>
+                <div style="display: flex; gap: 8px; font-size: 11px;">
+                  <button type="button" id="btn-od-select-all-plugins" class="link-btn" style="background: none; border: none; color: var(--accent); cursor: pointer; text-decoration: underline;">Marcar todos</button>
+                  <button type="button" id="btn-od-unselect-all-plugins" class="link-btn" style="background: none; border: none; color: var(--text-muted); cursor: pointer; text-decoration: underline;">Desmarcar</button>
+                </div>
+              </div>
+              <div id="od-plugins-list" style="max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding-left: 24px;">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+
+            <!-- Seção 3: Outras Configurações -->
+            <div class="od-import-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+              <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px;">⚙️ Configurações & Recursos:</div>
+              <div style="display: flex; flex-direction: column; gap: 8px; padding-left: 10px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12.5px;">
+                  <input type="checkbox" id="od-check-apps" checked>
+                  <span>🔀 <strong>Troca Automática de Perfis</strong> (<code>applications.json</code>)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12.5px;">
+                  <input type="checkbox" id="od-check-images" checked>
+                  <span>🖼️ <strong>Imagens e Ícones Personalizados</strong> (pasta <code>images/</code>)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12.5px;">
+                  <input type="checkbox" id="od-check-settings" checked>
+                  <span>🛠️ <strong>Configurações dos Plugins</strong> (pasta <code>settings/</code>)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div id="od-import-feedback" class="test-feedback" style="display: none; padding: 8px 12px; border-radius: 6px;"></div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-top: 1px solid var(--border-color); background: var(--bg-surface);">
+          <button type="button" id="btn-close-od-modal" class="btn secondary">Fechar</button>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" id="btn-od-import-selected" class="btn secondary">📥 Importar Selecionados</button>
+            <button type="button" id="btn-od-import-all" class="btn primary">⚡ Importar Tudo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- Background container for Webview/HTML plugins like Multi OBS -->
+  <div id="html-plugins-container" style="display:none; width:0; height:0; position:absolute; pointer-events:none;"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

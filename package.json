@@ -1,0 +1,14 @@
+{
+  "name": "uzlinux-studiodeck",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "High-Performance Rust OpenDeck & Ulanzi D200 Controller",
+  "scripts": {
+    "dev:ui": "vite ui --port 1420",
+    "dev": "cargo tauri dev",
+    "build": "cargo tauri build"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

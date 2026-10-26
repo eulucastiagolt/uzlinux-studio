@@ -1,0 +1,17 @@
+[package]
+name = "uzlinux-window-watcher"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+uzlinux-core.workspace = true
+tokio.workspace = true
+active-win-pos-rs.workspace = true
+anyhow.workspace = true
+thiserror.workspace = true
+log.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

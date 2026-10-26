@@ -1,0 +1,38 @@
+[package]
+name = "uzlinux-app"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Aplicativo desktop central Uzlinux Studio"
+
+[dependencies]
+uzlinux-core.workspace = true
+uzlinux-protocol.workspace = true
+uzlinux-server.workspace = true
+uzlinux-plugin-manager.workspace = true
+uzlinux-device-driver.workspace = true
+uzlinux-renderer.workspace = true
+uzlinux-window-watcher.workspace = true
+tokio.workspace = true
+dashmap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+log.workspace = true
+env_logger.workspace = true
+anyhow.workspace = true
+dirs.workspace = true
+open.workspace = true
+libc.workspace = true
+base64.workspace = true
+image.workspace = true
+enigo = "0.6"
+tauri = { version = "2.2", features = ["tray-icon"] }
+tauri-plugin-window-state = "2.5.0"
+
+[build-dependencies]
+tauri-build = { version = "2.2", features = [] }
+
+[[bin]]
+name = "uzlinux-studio"
+path = "src/main.rs"
