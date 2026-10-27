@@ -19,6 +19,9 @@
   - Automatic system language detection (via OS locale/environment).
   - Defaults to English if unidentified or unsupported.
   - Real-time language switching directly in Settings (English, Brazilian Portuguese, and extensible catalogs) with immediate UI re-rendering.
+- **Autonomous AI Agent Integration & Scaffolding:**
+  - Native support for autonomous coding agents (Antigravity, Claude Code, Cursor, Windsurf, Copilot) via universal [`AGENT.md`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/AGENT.md) directives and a dedicated Agent Skill ([`skills/uzlinux-plugin-creator/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/skills/uzlinux-plugin-creator/SKILL.md)).
+  - Instant CLI scaffolding (`python3 scripts/create_plugin.py`) and automated compliance validation (`python3 scripts/validate_plugin.py`), allowing an AI agent to build and install working deck buttons directly from natural language prompts.
 - **Open Ecosystem Compatibility:**
   - Selective or full one-click import of profiles, plugins, and settings from OpenDeck.
   - Embedded HTML/JS Property Inspectors loaded in isolated WebViews via WebSocket and `postMessage` bridge.
@@ -38,12 +41,11 @@ Detailed developer and user guides are available in the [`docs/`](file:///home/l
    - Creating HTML/JS Property Inspectors and communicating via `postMessage`.
    - Full reference implementations in **Python**, **Rust**, and **Shell Script**.
 
-2. 🤖 **[Creating Plugins with AI (No Coding Required)](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/docs/AI_CREATION_GUIDE.md)**
-   - Step-by-step guide designed for content creators and end users.
-   - 4-question planning checklist to specify your custom action.
-   - **Master AI Prompt** ready to copy-paste into ChatGPT, Claude, Gemini, or Antigravity.
-   - End-to-end practical example (Cryptocurrency Ticker Plugin).
-   - How to install plugins on Linux and prompt templates for troubleshooting.
+2. 🤖 **[AI Agents & Automated Plugin Creation Guide](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/docs/AI_CREATION_GUIDE.md)**
+   - Connect any AI Agent (Antigravity, Claude Code, Cursor, Copilot, ChatGPT) to autonomously design, test, and install plugins.
+   - Comprehensive instructions on using [`AGENT.md`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/AGENT.md) and [`CLAUDE.md`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/CLAUDE.md).
+   - Dedicated Agent Skill specifications in [`skills/uzlinux-plugin-creator/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/skills/uzlinux-plugin-creator/SKILL.md).
+   - Automated CLI scaffolding (`scripts/create_plugin.py`) and validator (`scripts/validate_plugin.py`).
 
 3. 📐 **[Architecture and Development Plan](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/docs/DEVELOPMENT_PLAN.md)**
    - Full technical architecture, crate breakdown, and device protocol specifications.
