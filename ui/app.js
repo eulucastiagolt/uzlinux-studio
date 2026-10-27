@@ -94,6 +94,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // Initialize internationalization (i18n)
+  try {
+    const s = await invoke('get_settings');
+    const lang = s?.language || 'auto';
+    if (window.i18n) {
+      window.i18n.setLanguage(lang);
+    }
+  } catch (_) {
+    if (window.i18n) window.i18n.setLanguage('auto');
+  }
+
+  window.addEventListener('uzlinux:language-changed', async () => {
+    await loadCategories();
+    if (selectedKeyIndex !== null) {
+      renderInspector(selectedKeyIndex);
+    }
+  });
+
   await initPorts();
   await loadDevices();
   await loadCategories();
@@ -106,13 +124,15 @@ async function initHtmlPlugins() {
   if (!container) return;
   container.innerHTML = '';
 
+  const activeLang = window.i18n ? window.i18n.getLocale() : 'en';
+
   try {
     const plugins = await invoke('get_plugins_list');
     plugins.forEach((plugin) => {
       if (plugin.pluginType === 'html' && plugin.executablePath) {
         const iframe = document.createElement('iframe');
         const infoPayload = encodeURIComponent(JSON.stringify({
-          application: { font: "Liberation Sans", language: "pt_BR", platform: "linux", version: "2.14.0" },
+          application: { font: "Liberation Sans", language: activeLang, platform: "linux", version: "2.14.0" },
           plugin: { uuid: plugin.uuid, version: plugin.version }
         }));
         const srcPath = `plugins/${plugin.uuid}/${plugin.executablePath}`;
@@ -125,7 +145,7 @@ async function initHtmlPlugins() {
     console.warn('Failed to load HTML plugins dynamically, falling back to Multi OBS:', err);
     const multiObsIframe = document.createElement('iframe');
     const infoPayload = encodeURIComponent(JSON.stringify({
-      application: { font: "Liberation Sans", language: "pt_BR", platform: "linux", version: "2.14.0" },
+      application: { font: "Liberation Sans", language: activeLang, platform: "linux", version: "2.14.0" },
       plugin: { uuid: "dev.theca11.multiobs.sdPlugin", version: "0.8.2" }
     }));
     multiObsIframe.src = `http://127.0.0.1:${serverPorts.http_assets}/plugins/dev.theca11.multiobs.sdPlugin/plugin/app.html?port=${serverPorts.plugin_ws}&pluginUUID=dev.theca11.multiobs.sdPlugin&registerEvent=registerPlugin&info=${infoPayload}`;
@@ -1269,7 +1289,7 @@ function selectKey(index) {
   if (keyData.action.property_inspector && !keyData.action.property_inspector.startsWith('native:') && !isNative) {
     piWrapper.style.display = 'flex';
     const context = keyData.context || `Keypad.${index}.0`;
-    const appInfo = { font: "Liberation Sans", language: "pt_BR", platform: "linux", version: "2.14.0" };
+    const appInfo = { font: "Liberation Sans", language: window.i18n ? window.i18n.getLocale() : "en", platform: "linux", version: "2.14.0" };
     const pluginMeta = { uuid: keyData.action.plugin, version: "1.0.0" };
     const actionInfo = {
       action: keyData.action.uuid,
@@ -2037,7 +2057,8 @@ function setupEventListeners() {
 
   // New Profile
   document.getElementById('btn-new-profile').addEventListener('click', async () => {
-    const name = prompt('Nome do novo perfil:');
+    const promptMsg = window.tr ? window.tr('dialog.prompt_profile_name') : 'Nome do novo perfil:';
+    const name = prompt(promptMsg);
     if (name && name.trim()) {
       await invoke('create_profile', { deviceId: currentDeviceId, profileName: name.trim() });
       await loadProfiles(currentDeviceId);
@@ -2047,7 +2068,8 @@ function setupEventListeners() {
   // Rename Profile
   document.getElementById('btn-rename-profile').addEventListener('click', async () => {
     if (!currentProfileName) return;
-    const newName = prompt('Novo nome para o perfil:', currentProfileName);
+    const promptMsg = window.tr ? window.tr('dialog.prompt_rename_profile') : 'Novo nome para o perfil:';
+    const newName = prompt(promptMsg, currentProfileName);
     if (newName && newName.trim() && newName.trim() !== currentProfileName) {
       await invoke('rename_profile', { deviceId: currentDeviceId, oldName: currentProfileName, newName: newName.trim() });
       await loadProfiles(currentDeviceId);
@@ -2057,10 +2079,11 @@ function setupEventListeners() {
   // Delete Profile
   document.getElementById('btn-delete-profile').addEventListener('click', async () => {
     if (!currentProfileName || currentProfileName === 'Default') {
-      alert('Não é possível excluir o perfil padrão.');
+      alert(window.tr ? window.tr('dialog.cannot_delete_default') || 'Default profile cannot be deleted.' : 'Não é possível excluir o perfil padrão.');
       return;
     }
-    if (confirm(`Tem certeza que deseja excluir o perfil "${currentProfileName}"?`)) {
+    const confirmMsg = window.tr ? window.tr('dialog.confirm_delete_profile', [currentProfileName]) : `Tem certeza que deseja excluir o perfil "${currentProfileName}"?`;
+    if (confirm(confirmMsg)) {
       await invoke('delete_profile', { deviceId: currentDeviceId, profileName: currentProfileName });
       await loadProfiles(currentDeviceId);
     }
@@ -2304,6 +2327,8 @@ function setupEventListeners() {
         document.getElementById('sleep-input').value = s.sleep_timeout_minutes;
         document.getElementById('check-background').checked = s.background;
         document.getElementById('check-sleep-lock').checked = s.sleep_when_computer_locked;
+        const langSelect = document.getElementById('settings-language');
+        if (langSelect) langSelect.value = s.language || 'auto';
       }
     } catch (_) {}
 
@@ -2344,7 +2369,15 @@ function setupEventListeners() {
       current.sleep_timeout_minutes = parseInt(document.getElementById('sleep-input').value, 10);
       current.background = document.getElementById('check-background').checked;
       current.sleep_when_computer_locked = document.getElementById('check-sleep-lock').checked;
+      const langSelect = document.getElementById('settings-language');
+      if (langSelect) {
+        current.language = langSelect.value;
+        if (window.i18n) {
+          window.i18n.setLanguage(current.language);
+        }
+      }
       await invoke('set_settings', { settings: current });
+      await loadCategories();
     } catch (e) {
       console.error('Failed to save general settings:', e);
     }

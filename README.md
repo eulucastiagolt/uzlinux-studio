@@ -1,77 +1,84 @@
 # Uzlinux Studio 🎛️
 
-> **Estação Nativa de Controle e Automação para Stream Controllers em Rust.**  
-> O **Uzlinux Studio** é um software desktop moderno de alto desempenho, desenvolvido com foco primordial na integração com dispositivos da **Ulanzi** (como o **Ulanzi D200 / D200H** e outros modelos), mas com suporte aberto a outros stream controllers do mercado.  
-> Oferece total interoperabilidade com o ecossistema de configurações, perfis, ações e plugins compatíveis com OpenDeck e Elgato Stream Deck, porém reconstruído com arquitetura nativa em Rust (Wayland / X11, PipeWire nativo, MPRIS nativo e Tauri v2).
+> **Native Control and Automation Station for Stream Controllers in Rust.**  
+> **Uzlinux Studio** is a high-performance desktop application built with a primary focus on deep integration with **Ulanzi** hardware (such as the **Ulanzi Stream Controller D200 / D200H** and other models), while providing open support for other stream controllers on the market.  
+> It provides full interoperability with configuration files, profiles, actions, and plugins compatible with OpenDeck and Elgato Stream Deck, rebuilt from scratch with a modern asynchronous Rust architecture (Wayland / X11, native PipeWire, native MPRIS, and Tauri v2).
 
 ---
 
-## 🌟 Principais Recursos
+## 🌟 Key Features
 
-- **Foco e Otimização para Hardware Ulanzi (e compatíveis):**
-  - Integração profunda com o **Ulanzi Stream Controller D200 / D200H** com suas 14 telas LCD independentes e barra contínua de status.
-  - Driver de hardware embutido no núcleo (*Zero-Setup*) com monitoramento de conexão e loop de heartbeat contínuo para evitar suspensões indesejadas de firmware.
-  - Abertura para outros stream controllers e modo **Virtual Deck** para testes ou uso em tela sem hardware físico conectado.
-- **Ações e Plugins Nativos Integrados ao Core:**
-  - Áudio Linux nativo via **PipeWire** (controle fino de volume, alternância de saídas/entradas, mute) e controle de mídia nativo via **MPRIS** sem depender de plugins externos lentos.
-  - Comandos de sistema em tempo real: execução Shell (`runcommand`), abertura de URLs (`openurl`), alternância de perfis (`switchprofile`), controle de brilho de hardware (`brightness`) e simulação de atalhos e teclado (`simulateinput`).
-- **Compatibilidade com Ecossistema Aberto:**
-  - Importação seletiva e compatibilidade transparente com arquivos de perfil, configurações e plugins do ecossistema OpenDeck / Stream Deck.
-  - Suporte a Property Inspectors em HTML/JS embutidos via WebSocket e ponte `postMessage`.
-- **Renderização e Tipografia Nítidas:**
-  - Renderização nativa de rótulos e títulos com contorno de alto contraste, alinhamentos configuráveis e subpixel blending com `ab_glyph`.
-
----
-
-## 📚 Documentação de Plugins
-
-Criamos guias completos e detalhados na pasta [`docs/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/docs):
-
-1. 🛠️ **[Guia Técnico de Desenvolvimento de Plugins](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/docs/GUIA_DESENVOLVIMENTO_PLUGINS.md)**
-   - Especificação técnica profunda da arquitetura de processos isolados.
-   - Detalhamento de argumentos CLI (`-port`, `-pluginUUID`, `-registerEvent`, `-info`).
-   - Todos os esquemas de mensagens JSON para WebSockets (`setImage`, `setTitle`, `keyDown`, `willAppear`, etc.).
-   - Criação de Property Inspectors (HTML/JS) e comunicação via `postMessage`.
-   - Exemplos práticos completos em **Python**, **Rust** e **Shell Script**.
-
-2. 🤖 **[Como Criar Plugins com Inteligência Artificial (Sem Saber Programar)](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/docs/GUIA_CRIACAO_COM_IA.md)**
-   - Guia passo a passo voltado para usuários finais e criadores de conteúdo.
-   - Roteiro mental em 4 perguntas para estruturar o seu botão.
-   - **Prompt Mestre** pronto para copiar e colar no ChatGPT, Claude, Gemini ou Antigravity.
-   - Exemplo prático de ponta a ponta (Plugin de Cotação de Criptomoedas).
-   - Como instalar os arquivos no Linux e prompts de correção para erros comuns.
+- **Built & Optimized for Ulanzi Hardware (and compatible devices):**
+  - Deep hardware integration with the **Ulanzi Stream Controller D200 / D200H**, featuring 14 independent LCD button displays and continuous status bar.
+  - Core-embedded hardware driver (*Zero-Setup*) with connection monitoring and continuous 1000ms heartbeat loops to keep device firmware awake and active.
+  - Open extensibility for other stream controllers and a built-in **Virtual Deck** mode for testing or on-screen touch control without physical hardware.
+- **Native Core Actions & Built-in Services:**
+  - Native Linux Audio powered by **PipeWire** (fine volume adjustment, output/input switching, mute toggle, Push-To-Talk) and native media control via **MPRIS** without relying on external plugins.
+  - Real-time system actions: Shell execution (`runcommand`), web URLs (`openurl`), profile switching (`switchprofile`), backlight brightness adjustment (`brightness`), and simulated input/shortcuts (`simulateinput`).
+- **Comprehensive Multi-Language (i18n) Engine:**
+  - Automatic system language detection (via OS locale/environment).
+  - Defaults to English if unidentified or unsupported.
+  - Real-time language switching directly in Settings (English, Brazilian Portuguese, and extensible catalogs) with immediate UI re-rendering.
+- **Open Ecosystem Compatibility:**
+  - Selective or full one-click import of profiles, plugins, and settings from OpenDeck.
+  - Embedded HTML/JS Property Inspectors loaded in isolated WebViews via WebSocket and `postMessage` bridge.
+- **Crisp Typography & Dynamic Rendering:**
+  - High-performance button text and label rendering with contrast outlines, customizable alignments (`top`, `middle`, `bottom`), and subpixel alpha blending using `ab_glyph`.
 
 ---
 
-## 🚀 Compilação e Execução
+## 📚 Documentation
 
-### Pré-requisitos (Debian/Ubuntu/Fedora/Arch):
+Detailed developer and user guides are available in the [`docs/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/docs) directory:
+
+1. 🛠️ **[Plugin Development Guide](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/docs/PLUGIN_DEVELOPMENT_GUIDE.md)**
+   - In-depth technical specification of the process-isolated plugin architecture.
+   - CLI arguments (`-port`, `-pluginUUID`, `-registerEvent`, `-info`).
+   - JSON-RPC WebSocket protocol specification (`setImage`, `setTitle`, `keyDown`, `willAppear`, etc.).
+   - Creating HTML/JS Property Inspectors and communicating via `postMessage`.
+   - Full reference implementations in **Python**, **Rust**, and **Shell Script**.
+
+2. 🤖 **[Creating Plugins with AI (No Coding Required)](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/docs/AI_CREATION_GUIDE.md)**
+   - Step-by-step guide designed for content creators and end users.
+   - 4-question planning checklist to specify your custom action.
+   - **Master AI Prompt** ready to copy-paste into ChatGPT, Claude, Gemini, or Antigravity.
+   - End-to-end practical example (Cryptocurrency Ticker Plugin).
+   - How to install plugins on Linux and prompt templates for troubleshooting.
+
+3. 📐 **[Architecture and Development Plan](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/docs/DEVELOPMENT_PLAN.md)**
+   - Full technical architecture, crate breakdown, and device protocol specifications.
+
+---
+
+## 🚀 Building & Running
+
+### System Prerequisites (Debian / Ubuntu / Fedora / Arch):
 - Rust 1.80+ (`cargo`, `rustc`)
-- Node.js 18+ e npm
-- Bibliotecas de sistema: `libwebkit2gtk-4.1-dev`, `libgtk-3-dev`, `libudev-dev`
+- Node.js 18+ and npm
+- Linux development libraries: `libwebkit2gtk-4.1-dev`, `libgtk-3-dev`, `libudev-dev`
 
-### Executando em Modo Desenvolvimento:
+### Running in Development Mode:
 ```bash
 ./dev.sh
 ```
 
-### Compilando o Binário Release:
+### Compiling Optimized Release Binary:
 ```bash
 cargo build --release
 ```
-O executável final otimizado será gerado em:
+The optimized executable will be generated at:
 ```text
 target/release/uzlinux-studio
 ```
 
 ---
 
-## 📂 Estrutura do Workspace
+## 📂 Workspace Structure
 
-- [`crates/uzlinux-app/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/crates/uzlinux-app): Aplicação desktop central e comandos Tauri v2.
-- [`crates/uzlinux-core/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/crates/uzlinux-core): Gerenciamento de configurações, perfis e plugins instalados.
-- [`crates/uzlinux-renderer/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/crates/uzlinux-renderer): Motor gráfico de composição de botões e tipografia com `ab_glyph`.
-- [`crates/uzlinux-server/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/crates/uzlinux-server): Servidor WebSocket para plugins e HTTP Asset Server.
-- [`crates/uzlinux-protocol/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/crates/uzlinux-protocol): Definições de eventos Inbound e Outbound do protocolo Stream Deck.
-- [`crates/uzlinux-device-driver/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/crates/uzlinux-device-driver): Drivers de dispositivos e Virtual Deck.
-- [`bundled_plugins/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/bundled_plugins): Plugins oficiais embutidos por padrão com o software.
+- [`crates/uzlinux-app/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/crates/uzlinux-app): Central desktop application and Tauri v2 commands.
+- [`crates/uzlinux-core/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/crates/uzlinux-core): Configuration, profiles, and settings management with automatic migration.
+- [`crates/uzlinux-renderer/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/crates/uzlinux-renderer): High-performance graphics composition engine and typography using `ab_glyph`.
+- [`crates/uzlinux-server/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/crates/uzlinux-server): Dynamic WebSocket hubs for plugins/inspectors and embedded HTTP asset server.
+- [`crates/uzlinux-protocol/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/crates/uzlinux-protocol): Stream Deck inbound/outbound WebSocket event models.
+- [`crates/uzlinux-device-driver/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/crates/uzlinux-device-driver): Native USB HID device drivers (Ulanzi D200) and Virtual Deck.
+- [`bundled_plugins/`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/bundled_plugins): Official bundled plugins shipped out-of-the-box.

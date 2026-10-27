@@ -20,25 +20,25 @@
 
       <div class="header-controls">
         <div class="control-group device-control-group">
-          <label for="device-select" title="Dispositivo Selecionado">📟 Disp:</label>
+          <label for="device-select" title="Dispositivo Selecionado" data-i18n="header.device">📟 Disp:</label>
           <select id="device-select" class="dropdown dropdown-compact"></select>
         </div>
 
         <div class="control-group">
-          <label>Perfil:</label>
+          <label data-i18n="header.profile">Perfil:</label>
           <div class="profile-actions-wrapper">
             <select id="profile-select" class="dropdown"></select>
-            <button id="btn-new-profile" class="btn-icon" title="Novo Perfil">➕</button>
-            <button id="btn-rename-profile" class="btn-icon" title="Renomear Perfil">✏️</button>
-            <button id="btn-delete-profile" class="btn-icon danger" title="Excluir Perfil">🗑️</button>
-            <button id="btn-auto-profile" class="btn-icon" title="Perfis Automáticos por Aplicativo (Troca Automática)">🔀</button>
+            <button id="btn-new-profile" class="btn-icon" title="Novo Perfil" data-i18n-title="header.new_profile">➕</button>
+            <button id="btn-rename-profile" class="btn-icon" title="Renomear Perfil" data-i18n-title="header.rename_profile">✏️</button>
+            <button id="btn-delete-profile" class="btn-icon danger" title="Excluir Perfil" data-i18n-title="header.delete_profile">🗑️</button>
+            <button id="btn-auto-profile" class="btn-icon" title="Perfis Automáticos por Aplicativo (Troca Automática)" data-i18n-title="header.auto_profile">🔀</button>
           </div>
         </div>
       </div>
 
       <div class="header-status">
-        <button id="btn-plugins" class="btn secondary">🧩 Plugins</button>
-        <button id="btn-settings" class="btn secondary">⚙️ Configurações</button>
+        <button id="btn-plugins" class="btn secondary" data-i18n="header.plugins_btn">🧩 Plugins</button>
+        <button id="btn-settings" class="btn secondary" data-i18n="header.settings_btn">⚙️ Configurações</button>
       </div>
     </header>
 
@@ -47,8 +47,8 @@
       <!-- Left: Actions Palette -->
       <aside class="sidebar-palette">
         <div class="palette-header">
-          <h2>Biblioteca de Ações</h2>
-          <input type="text" id="action-search" class="search-input" placeholder="Buscar ações...">
+          <h2 data-i18n="palette.title">Biblioteca de Ações</h2>
+          <input type="text" id="action-search" class="search-input" placeholder="Buscar ações..." data-i18n-placeholder="palette.search_placeholder">
         </div>
         <div id="categories-list" class="categories-list">
           <!-- Populated by JS -->
@@ -60,7 +60,7 @@
         <div class="deck-chassis">
           <div class="deck-info-bar">
             <span id="active-device-name">Ulanzi Stream Controller D200</span>
-            <span class="deck-badge" id="grid-dimensions-badge">Grade 3 × 5 (14 Teclas - Ulanzi D200)</span>
+            <span class="deck-badge" id="grid-dimensions-badge" data-i18n="deck.badge_d200">Grade 3 × 5 (14 Teclas - Ulanzi D200)</span>
           </div>
 
           <div id="keys-grid" class="keys-grid grid-3x5">
@@ -68,7 +68,7 @@
           </div>
 
           <div class="deck-footer-hint">
-            💡 <span>Dica: Arraste uma ação para o grid, ou arraste teclas entre si para mover ou trocar posições.</span>
+            <span data-i18n="deck.footer_hint">💡 Dica: Arraste uma ação para o grid, ou arraste teclas entre si para mover ou trocar posições.</span>
           </div>
         </div>
       </section>
@@ -76,39 +76,39 @@
       <!-- Right: Inspector Panel -->
       <aside class="sidebar-inspector">
         <div class="inspector-header">
-          <h2>Inspetor de Propriedades</h2>
-          <span id="selected-key-badge" class="badge">Nenhuma tecla selecionada</span>
+          <h2 data-i18n="inspector.title">Inspetor de Propriedades</h2>
+          <span id="selected-key-badge" class="badge" data-i18n="inspector.no_key_selected">Nenhuma tecla selecionada</span>
         </div>
 
         <div id="inspector-content" class="inspector-content">
           <div class="inspector-empty">
             <div class="empty-icon">🖱️</div>
-            <p>Selecione uma tecla na grade ao lado para editar o título, imagem ou abrir as opções do plugin.</p>
+            <p data-i18n="inspector.empty_hint">Selecione uma tecla na grade ao lado para editar o título, imagem ou abrir as opções do plugin.</p>
           </div>
 
           <div id="inspector-form" class="inspector-form" style="display: none;">
             <div class="form-group">
-              <label>Nome da Ação</label>
+              <label data-i18n="inspector.action_name">Nome da Ação</label>
               <div id="insp-action-name" class="static-val">-</div>
             </div>
 
             <div class="form-group">
-              <label>Plugin Responsável</label>
+              <label data-i18n="inspector.plugin_author">Plugin Responsável</label>
               <div id="insp-action-plugin" class="static-val code">-</div>
             </div>
 
             <div class="form-group">
-              <label for="insp-title-input">Título Exibido</label>
-              <input type="text" id="insp-title-input" class="text-input" placeholder="Digite o texto...">
+              <label for="insp-title-input" data-i18n="inspector.key_title">Título Exibido</label>
+              <input type="text" id="insp-title-input" class="text-input" placeholder="Digite o texto..." data-i18n-placeholder="inspector.title_placeholder">
             </div>
 
             <div class="form-row">
               <div class="form-group half">
-                <label for="insp-color-input">Cor do Texto</label>
+                <label for="insp-color-input" data-i18n="inspector.text_color">Cor do Texto</label>
                 <input type="color" id="insp-color-input" class="color-input" value="#FFFFFF">
               </div>
               <div class="form-group half">
-                <label for="insp-size-input">Tamanho da Fonte</label>
+                <label for="insp-size-input" data-i18n="inspector.font_size">Tamanho da Fonte</label>
                 <input type="number" id="insp-size-input" class="number-input" min="8" max="36" value="16">
               </div>
             </div>
@@ -116,32 +116,32 @@
             <!-- Custom Icon Section for all actions -->
             <div class="form-group icon-customization-group" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
               <label style="display: flex; justify-content: space-between; align-items: center; font-weight: 600; margin-bottom: 6px;">
-                <span>🖼️ Ícone da Ação</span>
+                <span data-i18n="inspector.action_icon">🖼️ Ícone da Ação</span>
                 <span id="insp-state-badge" class="badge" style="font-size: 10px; display: none;">Estado 0</span>
               </label>
 
               <!-- State selector if action has multiple states -->
               <div id="insp-states-wrapper" style="display: none; margin-bottom: 8px;">
-                <label for="insp-state-select" style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;">Estado da Tecla:</label>
+                <label for="insp-state-select" style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px; display: block;" data-i18n="inspector.key_state">Estado da Tecla:</label>
                 <select id="insp-state-select" class="select-input" style="padding: 4px 8px; font-size: 12px; width: 100%;"></select>
               </div>
 
               <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
-                <div id="insp-icon-preview-box" style="width: 54px; height: 54px; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); position: relative; cursor: pointer;" title="Clique ou arraste uma imagem aqui para alterar o ícone">
+                <div id="insp-icon-preview-box" style="width: 54px; height: 54px; background: rgba(0,0,0,0.35); border: 1px solid var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); position: relative; cursor: pointer;">
                   <img id="insp-icon-preview-img" src="" alt="Icon" style="max-width: 100%; max-height: 100%; object-fit: contain; display: none; pointer-events: none;">
                   <span id="insp-icon-preview-fallback" style="font-size: 22px; color: var(--text-muted);">🔲</span>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
                   <div style="display: flex; gap: 6px;">
-                    <button type="button" id="btn-insp-upload-icon" class="btn secondary btn-sm" style="flex: 1; padding: 6px 8px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" title="Carregar imagem do seu computador (PNG, SVG, JPG, WEBP, GIF, BMP)">
+                    <button type="button" id="btn-insp-upload-icon" class="btn secondary btn-sm" style="flex: 1; padding: 6px 8px; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px;" data-i18n="inspector.choose_image">
                       📁 Escolher Imagem
                     </button>
-                    <button type="button" id="btn-insp-pick-system" class="btn secondary btn-sm" style="padding: 6px 8px; font-size: 11px; display: flex; align-items: center; gap: 4px;" title="Escolher ícone de aplicativo instalado no sistema">
+                    <button type="button" id="btn-insp-pick-system" class="btn secondary btn-sm" style="padding: 6px 8px; font-size: 11px; display: flex; align-items: center; gap: 4px;" data-i18n="inspector.pick_system">
                       🔍 Sistema
                     </button>
                   </div>
-                  <button type="button" id="btn-insp-reset-icon" class="btn btn-sm" style="padding: 2px 0; font-size: 11px; align-self: flex-start; background: none; border: none; cursor: pointer; color: var(--danger, #f38ba8); text-decoration: underline;" title="Restaurar ícone original padrão desta ação">
+                  <button type="button" id="btn-insp-reset-icon" class="btn btn-sm" style="padding: 2px 0; font-size: 11px; align-self: flex-start; background: none; border: none; cursor: pointer; color: var(--danger, #f38ba8); text-decoration: underline;" data-i18n="inspector.reset_icon">
                     ↺ Restaurar Ícone Padrão
                   </button>
                 </div>
@@ -154,7 +154,7 @@
               <div class="form-row" style="margin-top: 10px; align-items: center;">
                 <div class="form-group half" style="margin-bottom: 0;">
                   <label for="insp-icon-scale" style="font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 2px;">
-                    <span>Tamanho:</span>
+                    <span data-i18n="inspector.icon_scale">Tamanho:</span>
                     <span id="insp-icon-scale-val">100%</span>
                   </label>
                   <input type="range" id="insp-icon-scale" min="20" max="100" step="5" value="100" style="width: 100%; cursor: pointer;">
@@ -162,15 +162,15 @@
                 <div class="form-group half" style="margin-bottom: 0; display: flex; align-items: center; justify-content: flex-start; padding-top: 14px;">
                   <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; cursor: pointer; user-select: none;">
                     <input type="checkbox" id="insp-show-title-check" checked style="cursor: pointer;">
-                    <span>Exibir Título</span>
+                    <span data-i18n="inspector.show_title">Exibir Título</span>
                   </label>
                 </div>
               </div>
             </div>
 
             <div class="inspector-actions">
-              <button id="btn-test-key" class="btn primary">⚡ Testar Clique</button>
-              <button id="btn-clear-key" class="btn danger">🗑️ Limpar Tecla</button>
+              <button id="btn-test-key" class="btn primary" data-i18n="inspector.test_click">⚡ Testar Clique</button>
+              <button id="btn-clear-key" class="btn danger" data-i18n="inspector.clear_key">🗑️ Limpar Tecla</button>
             </div>
 
             <!-- Native Action Config Panel -->
@@ -390,23 +390,23 @@
     <div id="settings-modal" class="modal-overlay" style="display: none;">
       <div class="modal-card modal-card-wide">
         <div class="modal-header">
-          <h2>Configurações do Uzlinux Studio</h2>
+          <h2 data-i18n="settings.modal_title">Configurações do Uzlinux Studio</h2>
           <button id="btn-close-settings" class="btn-icon">✖</button>
         </div>
 
         <!-- Settings Tabs -->
         <div class="modal-tabs">
-          <button class="tab-btn active" data-tab="tab-general">⚙️ Geral & Hardware</button>
-          <button class="tab-btn" data-tab="tab-obs">🎥 OBS Studio</button>
-          <button class="tab-btn" data-tab="tab-settings-plugins">🧩 Gerenciar Plugins</button>
-          <button class="tab-btn" data-tab="tab-auto-profiles">🔀 Perfis Automáticos</button>
+          <button class="tab-btn active" data-tab="tab-general" data-i18n="settings.tab_general">⚙️ Geral & Hardware</button>
+          <button class="tab-btn" data-tab="tab-obs" data-i18n="settings.tab_obs">🎥 OBS Studio</button>
+          <button class="tab-btn" data-tab="tab-settings-plugins" data-i18n="settings.tab_plugins">🧩 Gerenciar Plugins</button>
+          <button class="tab-btn" data-tab="tab-auto-profiles" data-i18n="settings.tab_auto_profiles">🔀 Perfis Automáticos</button>
         </div>
 
         <div class="modal-body">
           <!-- Tab 1: General & Hardware -->
           <div id="tab-general" class="tab-pane active">
             <div class="form-group" style="display: flex; gap: 10px; align-items: center; padding: 10px 14px; background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 16px;">
-              <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-right: 4px;">Status dos Serviços:</span>
+              <span style="font-size: 12px; font-weight: 600; color: var(--text-muted); margin-right: 4px;" data-i18n="settings.services_status">Status dos Serviços:</span>
               <div class="status-pill online" id="status-hardware" title="Hardware USB Conectado">
                 <span class="status-dot"></span> Ulanzi D200
               </div>
@@ -414,29 +414,40 @@
                 <span class="status-dot"></span> Hub OK
               </div>
             </div>
+
+            <!-- Language Selector -->
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label for="settings-language" style="font-weight: 600; font-size: 13px;" data-i18n="settings.language_label">Idioma da Interface:</label>
+              <select id="settings-language" class="dropdown" style="width: 100%;">
+                <option value="auto" data-i18n="settings.lang_auto">🌐 Automático (Detectar do Sistema)</option>
+                <option value="en" data-i18n="settings.lang_en">🇺🇸 English</option>
+                <option value="pt_BR" data-i18n="settings.lang_pt_br">🇧🇷 Português (Brasil)</option>
+              </select>
+            </div>
+
             <div class="form-group">
-              <label>Brilho do Backlight (D200): <span id="brightness-val">21%</span></label>
+              <label><span data-i18n="settings.brightness">Brilho do Backlight (D200):</span> <span id="brightness-val">21%</span></label>
               <input type="range" id="brightness-slider" min="0" max="100" value="21" class="slider">
             </div>
             <div class="form-group">
-              <label>Tempo de Sleep por Inatividade (minutos):</label>
+              <label for="sleep-input" data-i18n="settings.sleep_timeout">Tempo de Sleep por Inatividade (minutos):</label>
               <input type="number" id="sleep-input" min="1" max="180" value="30" class="number-input">
             </div>
             <div class="form-group checkbox-row">
               <input type="checkbox" id="check-background" checked>
-              <label for="check-background">Continuar executando em segundo plano (Bandeja / Tray)</label>
+              <label for="check-background" data-i18n="settings.background">Continuar executando em segundo plano (Bandeja / Tray)</label>
             </div>
             <div class="form-group checkbox-row">
               <input type="checkbox" id="check-sleep-lock" checked>
-              <label for="check-sleep-lock">Desligar tela quando o computador estiver bloqueado</label>
+              <label for="check-sleep-lock" data-i18n="settings.sleep_lock">Desligar tela quando o computador estiver bloqueado</label>
             </div>
 
             <div class="form-group" style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 12px;">
-              <label>Importação do OpenDeck:</label>
-              <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+              <label data-i18n="settings.opendeck_import">Importação do OpenDeck:</label>
+              <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;" data-i18n="settings.opendeck_import_desc">
                 Copie perfis, configurações e plugins do OpenDeck para a pasta isolada do Uzlinux Studio sem alterar os originais.
               </p>
-              <button type="button" id="btn-import-opendeck-settings" class="btn secondary btn-sm">📥 Importar do OpenDeck</button>
+              <button type="button" id="btn-import-opendeck-settings" class="btn secondary btn-sm" data-i18n="settings.btn_import_opendeck">📥 Importar do OpenDeck</button>
               <span id="import-settings-feedback" class="test-feedback" style="margin-left: 10px;"></span>
             </div>
           </div>
@@ -560,7 +571,7 @@
         </div>
 
         <div class="modal-footer">
-          <button id="btn-save-settings" class="btn primary">Salvar Todas as Configurações</button>
+          <button id="btn-save-settings" class="btn primary" data-i18n="settings.save_btn">Salvar Todas as Configurações</button>
         </div>
       </div>
     </div>
@@ -717,6 +728,7 @@
   <!-- Background container for Webview/HTML plugins like Multi OBS -->
   <div id="html-plugins-container" style="display:none; width:0; height:0; position:absolute; pointer-events:none;"></div>
 
+  <script src="i18n.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

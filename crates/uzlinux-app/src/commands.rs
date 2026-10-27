@@ -365,23 +365,25 @@ pub async fn get_categories(
     }
     plugin_categories.sort_by(|a, b| a.name.cmp(&b.name));
 
-    let mut result = build_native_categories(&settings.disabled_plugins);
+    let effective_lang = settings.resolve_language();
+    let mut result = build_native_categories(&settings.disabled_plugins, &effective_lang);
     result.extend(plugin_categories);
     Ok(result)
 }
 
-fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
+fn build_native_categories(disabled: &[String], lang: &str) -> Vec<CategoryInfo> {
     let mut cats = Vec::new();
+    let pt = lang.to_lowercase().starts_with("pt");
 
     if !disabled.contains(&"com.uzlinux.system-starterpack".to_string()) {
         cats.push(CategoryInfo {
-            name: "⚡ Sistema & Atalhos (Pré-instalado)".to_string(),
+            name: if pt { "⚡ Sistema & Atalhos (Pré-instalado)".to_string() } else { "⚡ System & Shortcuts (Pre-installed)".to_string() },
             icon: None,
             actions: vec![
                 ActionInfo {
                     uuid: "com.uzlinux.system-starterpack.launchapp".to_string(),
-                    name: "Abrir Aplicativo".to_string(),
-                    tooltip: Some("Inicia qualquer aplicativo instalado no Linux".to_string()),
+                    name: if pt { "Abrir Aplicativo".to_string() } else { "Launch Application".to_string() },
+                    tooltip: Some(if pt { "Inicia qualquer aplicativo instalado no Linux".to_string() } else { "Launches any desktop application installed on Linux".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.system-starterpack".to_string(),
                     property_inspector: "native:launchapp".to_string(),
@@ -393,8 +395,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.system-starterpack.openurl".to_string(),
-                    name: "Abrir URL / Site".to_string(),
-                    tooltip: Some("Abre uma página web no navegador padrão".to_string()),
+                    name: if pt { "Abrir URL / Site".to_string() } else { "Open URL / Website".to_string() },
+                    tooltip: Some(if pt { "Abre uma página web no navegador padrão".to_string() } else { "Opens a web page in default browser".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.system-starterpack".to_string(),
                     property_inspector: "native:openurl".to_string(),
@@ -406,8 +408,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.system-starterpack.command".to_string(),
-                    name: "Executar Comando Shell".to_string(),
-                    tooltip: Some("Executa um comando bash/shell no sistema".to_string()),
+                    name: if pt { "Executar Comando Shell".to_string() } else { "Execute Shell Command".to_string() },
+                    tooltip: Some(if pt { "Executa um comando bash/shell no sistema".to_string() } else { "Runs a bash/shell command on the system".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.system-starterpack".to_string(),
                     property_inspector: "native:command".to_string(),
@@ -419,8 +421,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.system-starterpack.simulateinput".to_string(),
-                    name: "Simular Entrada (Teclas / Mouse)".to_string(),
-                    tooltip: Some("Simula toques de teclas, atalhos, cliques de mouse ou texto digitado".to_string()),
+                    name: if pt { "Simular Entrada (Teclas / Mouse)".to_string() } else { "Simulate Input (Keys / Mouse)".to_string() },
+                    tooltip: Some(if pt { "Simula toques de teclas, atalhos, cliques de mouse ou texto digitado".to_string() } else { "Simulates keystrokes, shortcuts, mouse clicks, or typed text".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.system-starterpack".to_string(),
                     property_inspector: "native:simulateinput".to_string(),
@@ -432,53 +434,53 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.system-starterpack.switchprofile".to_string(),
-                    name: "Trocar Perfil".to_string(),
-                    tooltip: Some("Alterna para outro perfil do deck".to_string()),
+                    name: if pt { "Trocar Perfil".to_string() } else { "Switch Profile".to_string() },
+                    tooltip: Some(if pt { "Alterna para outro perfil do deck".to_string() } else { "Switches to another profile on the deck".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.system-starterpack".to_string(),
                     property_inspector: "native:switchprofile".to_string(),
                     controllers: vec!["Keypad".to_string()],
                     states: vec![StateDefinition {
-                        text: "Perfil".to_string(),
+                        text: if pt { "Perfil".to_string() } else { "Profile".to_string() },
                         ..Default::default()
                     }],
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.system-starterpack.brightness".to_string(),
-                    name: "Definir Brilho".to_string(),
-                    tooltip: Some("Configura ou ajusta o nível de brilho do deck".to_string()),
+                    name: if pt { "Definir Brilho".to_string() } else { "Set Brightness".to_string() },
+                    tooltip: Some(if pt { "Configura ou ajusta o nível de brilho do deck".to_string() } else { "Sets or adjusts the deck backlight brightness".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.system-starterpack".to_string(),
                     property_inspector: "native:brightness".to_string(),
                     controllers: vec!["Keypad".to_string()],
                     states: vec![StateDefinition {
-                        text: "🔆 Brilho".to_string(),
+                        text: if pt { "🔆 Brilho".to_string() } else { "🔆 Brightness".to_string() },
                         ..Default::default()
                     }],
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.system-starterpack.brightness.up".to_string(),
-                    name: "Brilho +10%".to_string(),
-                    tooltip: Some("Aumenta o brilho do deck em 10%".to_string()),
+                    name: if pt { "Brilho +10%".to_string() } else { "Brightness +10%".to_string() },
+                    tooltip: Some(if pt { "Aumenta o brilho do deck em 10%".to_string() } else { "Increases deck backlight brightness by 10%".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.system-starterpack".to_string(),
                     property_inspector: String::new(),
                     controllers: vec!["Keypad".to_string()],
                     states: vec![StateDefinition {
-                        text: "Brilho +".to_string(),
+                        text: if pt { "Brilho +".to_string() } else { "Bright +".to_string() },
                         ..Default::default()
                     }],
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.system-starterpack.brightness.down".to_string(),
-                    name: "Brilho -10%".to_string(),
-                    tooltip: Some("Diminui o brilho do deck em 10%".to_string()),
+                    name: if pt { "Brilho -10%".to_string() } else { "Brightness -10%".to_string() },
+                    tooltip: Some(if pt { "Diminui o brilho do deck em 10%".to_string() } else { "Decreases deck backlight brightness by 10%".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.system-starterpack".to_string(),
                     property_inspector: String::new(),
                     controllers: vec!["Keypad".to_string()],
                     states: vec![StateDefinition {
-                        text: "Brilho -".to_string(),
+                        text: if pt { "Brilho -".to_string() } else { "Bright -".to_string() },
                         ..Default::default()
                     }],
                 },
@@ -488,13 +490,13 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
 
     if !disabled.contains(&"com.uzlinux.mpris-media".to_string()) {
         cats.push(CategoryInfo {
-            name: "🎵 Controle de Mídia (MPRIS / Pré-instalado)".to_string(),
+            name: if pt { "🎵 Controle de Mídia (MPRIS / Pré-instalado)".to_string() } else { "🎵 Media Controller (MPRIS / Pre-installed)".to_string() },
             icon: None,
             actions: vec![
                 ActionInfo {
                     uuid: "com.uzlinux.mpris-media.playpause".to_string(),
                     name: "Play / Pause".to_string(),
-                    tooltip: Some("Reproduz ou pausa a mídia ativa (Spotify, YouTube, VLC)".to_string()),
+                    tooltip: Some(if pt { "Reproduz ou pausa a mídia ativa (Spotify, YouTube, VLC)".to_string() } else { "Plays or pauses active media (Spotify, YouTube, VLC)".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.mpris-media".to_string(),
                     property_inspector: "native:media".to_string(),
@@ -506,8 +508,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.mpris-media.next".to_string(),
-                    name: "Próxima Faixa".to_string(),
-                    tooltip: Some("Avança para a próxima música/faixa".to_string()),
+                    name: if pt { "Próxima Faixa".to_string() } else { "Next Track".to_string() },
+                    tooltip: Some(if pt { "Avança para a próxima música/faixa".to_string() } else { "Skips to the next music/track".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.mpris-media".to_string(),
                     property_inspector: String::new(),
@@ -519,8 +521,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.mpris-media.prev".to_string(),
-                    name: "Faixa Anterior".to_string(),
-                    tooltip: Some("Retorna para a música anterior".to_string()),
+                    name: if pt { "Faixa Anterior".to_string() } else { "Previous Track".to_string() },
+                    tooltip: Some(if pt { "Retorna para a música anterior".to_string() } else { "Returns to previous music/track".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.mpris-media".to_string(),
                     property_inspector: String::new(),
@@ -532,8 +534,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.mpris-media.stop".to_string(),
-                    name: "Parar Mídia".to_string(),
-                    tooltip: Some("Interrompe a reprodução de mídia".to_string()),
+                    name: if pt { "Parar Mídia".to_string() } else { "Stop Playback".to_string() },
+                    tooltip: Some(if pt { "Interrompe a reprodução de mídia".to_string() } else { "Stops active media playback".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.mpris-media".to_string(),
                     property_inspector: String::new(),
@@ -545,8 +547,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.mpris-media.volup".to_string(),
-                    name: "Volume do Player +5%".to_string(),
-                    tooltip: Some("Aumenta o volume do player ativo em 5%".to_string()),
+                    name: if pt { "Volume do Player +5%".to_string() } else { "Player Volume +5%".to_string() },
+                    tooltip: Some(if pt { "Aumenta o volume do player ativo em 5%".to_string() } else { "Increases active player volume by 5%".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.mpris-media".to_string(),
                     property_inspector: String::new(),
@@ -558,8 +560,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.mpris-media.voldown".to_string(),
-                    name: "Volume do Player -5%".to_string(),
-                    tooltip: Some("Diminui o volume do player ativo em 5%".to_string()),
+                    name: if pt { "Volume do Player -5%".to_string() } else { "Player Volume -5%".to_string() },
+                    tooltip: Some(if pt { "Diminui o volume do player ativo em 5%".to_string() } else { "Decreases active player volume by 5%".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.mpris-media".to_string(),
                     property_inspector: String::new(),
@@ -571,8 +573,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.mpris-media.seekforward".to_string(),
-                    name: "Avançar 10s".to_string(),
-                    tooltip: Some("Avança 10 segundos na faixa atual".to_string()),
+                    name: if pt { "Avançar 10s".to_string() } else { "Seek Forward 10s".to_string() },
+                    tooltip: Some(if pt { "Avança 10 segundos na faixa atual".to_string() } else { "Advances 10 seconds in current track".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.mpris-media".to_string(),
                     property_inspector: String::new(),
@@ -584,8 +586,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.mpris-media.seekbackward".to_string(),
-                    name: "Retroceder 10s".to_string(),
-                    tooltip: Some("Retrocede 10 segundos na faixa atual".to_string()),
+                    name: if pt { "Retroceder 10s".to_string() } else { "Seek Backward 10s".to_string() },
+                    tooltip: Some(if pt { "Retrocede 10 segundos na faixa atual".to_string() } else { "Rewinds 10 seconds in current track".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.mpris-media".to_string(),
                     property_inspector: String::new(),
@@ -597,8 +599,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.mpris-media.shuffle".to_string(),
-                    name: "Alternar Aleatório".to_string(),
-                    tooltip: Some("Ativa ou desativa a reprodução aleatória".to_string()),
+                    name: if pt { "Alternar Aleatório".to_string() } else { "Toggle Shuffle".to_string() },
+                    tooltip: Some(if pt { "Ativa ou desativa a reprodução aleatória".to_string() } else { "Toggles shuffle playback mode".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.mpris-media".to_string(),
                     property_inspector: String::new(),
@@ -610,8 +612,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.mpris-media.repeat".to_string(),
-                    name: "Alternar Repetição".to_string(),
-                    tooltip: Some("Alterna modo de repetição (Desativado / Playlist / Faixa)".to_string()),
+                    name: if pt { "Alternar Repetição".to_string() } else { "Toggle Repeat".to_string() },
+                    tooltip: Some(if pt { "Alterna modo de repetição (Desativado / Playlist / Faixa)".to_string() } else { "Toggles repeat mode (Off / Playlist / Track)".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.mpris-media".to_string(),
                     property_inspector: String::new(),
@@ -627,13 +629,13 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
 
     if !disabled.contains(&"com.uzlinux.pipewire-audio".to_string()) {
         cats.push(CategoryInfo {
-            name: "🔊 Áudio Linux (PipeWire / Pré-instalado)".to_string(),
+            name: if pt { "🔊 Áudio Linux (PipeWire / Pré-instalado)".to_string() } else { "🔊 Linux Audio (PipeWire / Pre-installed)".to_string() },
             icon: None,
             actions: vec![
                 ActionInfo {
                     uuid: "com.uzlinux.pipewire-audio.volume".to_string(),
-                    name: "Volume Master".to_string(),
-                    tooltip: Some("Controla o volume master do sistema (Aumentar, Diminuir ou Mudo)".to_string()),
+                    name: if pt { "Volume Master".to_string() } else { "Master Volume".to_string() },
+                    tooltip: Some(if pt { "Controla o volume master do sistema (Aumentar, Diminuir ou Mudo)".to_string() } else { "Controls system master volume (Up, Down or Mute)".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.pipewire-audio".to_string(),
                     property_inspector: "native:pipewire:volume".to_string(),
@@ -645,8 +647,8 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.pipewire-audio.micvolume".to_string(),
-                    name: "Volume do Microfone".to_string(),
-                    tooltip: Some("Controla o volume do microfone padrão (Aumentar, Diminuir ou Mudo)".to_string()),
+                    name: if pt { "Volume do Microfone".to_string() } else { "Microphone Volume".to_string() },
+                    tooltip: Some(if pt { "Controla o volume do microfone padrão (Aumentar, Diminuir ou Mudo)".to_string() } else { "Controls default microphone volume (Up, Down or Mute)".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.pipewire-audio".to_string(),
                     property_inspector: "native:pipewire:micvolume".to_string(),
@@ -658,34 +660,34 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.pipewire-audio.outputvolume".to_string(),
-                    name: "Volume de Saída Específica".to_string(),
-                    tooltip: Some("Controla o volume de um dispositivo de saída selecionado".to_string()),
+                    name: if pt { "Volume de Saída Específica".to_string() } else { "Specific Output Volume".to_string() },
+                    tooltip: Some(if pt { "Controla o volume de um dispositivo de saída selecionado".to_string() } else { "Controls volume of a selected output device".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.pipewire-audio".to_string(),
                     property_inspector: "native:pipewire:outputvolume".to_string(),
                     controllers: vec!["Keypad".to_string(), "Encoder".to_string()],
                     states: vec![StateDefinition {
-                        text: "🎧 Saída Vol".to_string(),
+                        text: if pt { "🎧 Saída Vol".to_string() } else { "🎧 Output Vol".to_string() },
                         ..Default::default()
                     }],
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.pipewire-audio.inputvolume".to_string(),
-                    name: "Volume de Entrada Específica".to_string(),
-                    tooltip: Some("Controla o volume de um microfone/entrada selecionado".to_string()),
+                    name: if pt { "Volume de Entrada Específica".to_string() } else { "Specific Input Volume".to_string() },
+                    tooltip: Some(if pt { "Controla o volume de um microfone/entrada selecionado".to_string() } else { "Controls volume of a selected input microphone".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.pipewire-audio".to_string(),
                     property_inspector: "native:pipewire:inputvolume".to_string(),
                     controllers: vec!["Keypad".to_string(), "Encoder".to_string()],
                     states: vec![StateDefinition {
-                        text: "🎙️ Entrada Vol".to_string(),
+                        text: if pt { "🎙️ Entrada Vol".to_string() } else { "🎙️ Input Vol".to_string() },
                         ..Default::default()
                     }],
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.pipewire-audio.appvolume".to_string(),
-                    name: "Volume de Aplicativo".to_string(),
-                    tooltip: Some("Controla o volume de um aplicativo específico em execução".to_string()),
+                    name: if pt { "Volume de Aplicativo".to_string() } else { "Application Volume".to_string() },
+                    tooltip: Some(if pt { "Controla o volume de um aplicativo específico em execução".to_string() } else { "Controls volume of a specific running application".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.pipewire-audio".to_string(),
                     property_inspector: "native:pipewire:appvolume".to_string(),
@@ -697,34 +699,34 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.pipewire-audio.switchoutput".to_string(),
-                    name: "Alternar Dispositivo de Saída".to_string(),
-                    tooltip: Some("Alterna para um dispositivo de áudio de saída ou circula entre eles".to_string()),
+                    name: if pt { "Alternar Dispositivo de Saída".to_string() } else { "Switch Output Device".to_string() },
+                    tooltip: Some(if pt { "Alterna para um dispositivo de áudio de saída ou circula entre eles".to_string() } else { "Switches to an audio output device or cycles between them".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.pipewire-audio".to_string(),
                     property_inspector: "native:pipewire:switchoutput".to_string(),
                     controllers: vec!["Keypad".to_string(), "Encoder".to_string()],
                     states: vec![StateDefinition {
-                        text: "🎧 Saída".to_string(),
+                        text: if pt { "🎧 Saída".to_string() } else { "🎧 Output".to_string() },
                         ..Default::default()
                     }],
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.pipewire-audio.switchinput".to_string(),
-                    name: "Alternar Dispositivo de Entrada".to_string(),
-                    tooltip: Some("Alterna para um microfone específico ou circula entre eles".to_string()),
+                    name: if pt { "Alternar Dispositivo de Entrada".to_string() } else { "Switch Input Device".to_string() },
+                    tooltip: Some(if pt { "Alterna para um microfone específico ou circula entre eles".to_string() } else { "Switches to a specific microphone or cycles between them".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.pipewire-audio".to_string(),
                     property_inspector: "native:pipewire:switchinput".to_string(),
                     controllers: vec!["Keypad".to_string(), "Encoder".to_string()],
                     states: vec![StateDefinition {
-                        text: "🎙️ Entrada".to_string(),
+                        text: if pt { "🎙️ Entrada".to_string() } else { "🎙️ Input".to_string() },
                         ..Default::default()
                     }],
                 },
                 ActionInfo {
                     uuid: "com.uzlinux.pipewire-audio.pushtotalk".to_string(),
-                    name: "Push to Talk (Pressione para Falar)".to_string(),
-                    tooltip: Some("Desmuta o microfone apenas enquanto segura a tecla".to_string()),
+                    name: if pt { "Push to Talk (Pressione para Falar)".to_string() } else { "Push to Talk (Hold to Speak)".to_string() },
+                    tooltip: Some(if pt { "Desmuta o microfone apenas enquanto segura a tecla".to_string() } else { "Unmutes microphone only while the key is held".to_string() }),
                     icon: None,
                     plugin: "com.uzlinux.pipewire-audio".to_string(),
                     property_inspector: "native:pipewire:pushtotalk".to_string(),
@@ -740,32 +742,32 @@ fn build_native_categories(disabled: &[String]) -> Vec<CategoryInfo> {
 
     // Ulanzi D200 Hardware Driver (Parte integrante do sistema, não é plugin e não pode ser desativado)
     cats.push(CategoryInfo {
-        name: "🎛️ Ulanzi D200 (Hardware Integrado)".to_string(),
+        name: if pt { "🎛️ Ulanzi D200 (Hardware Integrado)".to_string() } else { "🎛️ Ulanzi D200 (Integrated Hardware)".to_string() },
         icon: None,
         actions: vec![
             ActionInfo {
                 uuid: "com.uzlinux.ulanzi-d200.display_sleep".to_string(),
-                name: "Desligar / Ligar Telas do Deck".to_string(),
-                tooltip: Some("Alterna o estado de repouso das telas e LEDs do Ulanzi D200".to_string()),
+                name: if pt { "Desligar / Ligar Telas do Deck".to_string() } else { "Turn Deck Screens On / Off".to_string() },
+                tooltip: Some(if pt { "Alterna o estado de repouso das telas e LEDs do Ulanzi D200".to_string() } else { "Toggles sleep mode for Ulanzi D200 screens and LEDs".to_string() }),
                 icon: None,
                 plugin: "com.uzlinux.ulanzi-d200".to_string(),
                 property_inspector: String::new(),
                 controllers: vec!["Keypad".to_string()],
                 states: vec![StateDefinition {
-                    text: "Tela Sleep".to_string(),
+                    text: if pt { "Tela Sleep".to_string() } else { "Screen Sleep".to_string() },
                     ..Default::default()
                 }],
             },
             ActionInfo {
                 uuid: "com.uzlinux.ulanzi-d200.cycle_brightness".to_string(),
-                name: "Alternar Nível de Brilho".to_string(),
-                tooltip: Some("Alterna rapidamente os níveis de brilho do dispositivo".to_string()),
+                name: if pt { "Alternar Nível de Brilho".to_string() } else { "Cycle Brightness Level".to_string() },
+                tooltip: Some(if pt { "Alterna rapidamente os níveis de brilho do dispositivo".to_string() } else { "Quickly cycles through device brightness levels".to_string() }),
                 icon: None,
                 plugin: "com.uzlinux.ulanzi-d200".to_string(),
                 property_inspector: String::new(),
                 controllers: vec!["Keypad".to_string()],
                 states: vec![StateDefinition {
-                    text: "Brilho Ciclo".to_string(),
+                    text: if pt { "Brilho Ciclo".to_string() } else { "Cycle Bright".to_string() },
                     ..Default::default()
                 }],
             },

@@ -48,9 +48,35 @@ pub struct AppSettings {
 fn default_autolaunch() -> bool { false }
 fn default_true() -> bool { true }
 fn default_brightness() -> u8 { 80 }
-fn default_language() -> String { "en_US".to_string() }
+fn default_language() -> String { "auto".to_string() }
 fn default_sleep_timeout() -> u32 { 30 }
 fn default_version() -> String { "2.14.0".to_string() }
+
+impl AppSettings {
+    /// Resolves the effective language: if "auto" or empty, checks system environment (LANG / LC_ALL),
+    /// defaulting to "en" if not Portuguese or unrecognized.
+    pub fn resolve_language(&self) -> String {
+        let lang = self.language.trim();
+        if lang.is_empty() || lang.eq_ignore_ascii_case("auto") {
+            if let Ok(l) = std::env::var("LANG")
+                .or_else(|_| std::env::var("LC_ALL"))
+                .or_else(|_| std::env::var("LC_MESSAGES"))
+            {
+                let lower = l.to_lowercase();
+                if lower.starts_with("pt") {
+                    return "pt_BR".to_string();
+                }
+            }
+            return "en".to_string();
+        }
+
+        if lang.to_lowercase().starts_with("pt") {
+            "pt_BR".to_string()
+        } else {
+            "en".to_string()
+        }
+    }
+}
 
 impl Default for AppSettings {
     fn default() -> Self {
@@ -60,7 +86,7 @@ impl Default for AppSettings {
             brightness: 80,
             developer: false,
             disableelgato: false,
-            language: "en_US".to_string(),
+            language: "auto".to_string(),
             rotation: 0,
             separatewine: false,
             sleep_timeout_minutes: 30,
