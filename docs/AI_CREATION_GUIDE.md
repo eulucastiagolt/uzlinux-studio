@@ -1,109 +1,89 @@
-# How to Create Plugins for Uzlinux Studio Using AI (Without Coding)
+# AI Agent & Plugin Creation Guide — Uzlinux Studio
 
-> **You don't need programming experience to create customized buttons for your deck!**  
-> This guide provides step-by-step instructions on prompting any modern AI (ChatGPT, Claude, Google Gemini, Antigravity, etc.) to produce complete, working plugins ready for your Uzlinux Studio station.
-
----
-
-## 1. How It Works
-
-Modern AI models are proficient programmers, but they require the **exact technical protocol rules** of how Uzlinux Studio communicates with plugins (via a background local WebSocket connection).
-
-If you simply ask *"create a stream deck plugin"*, an AI will often generate generic code that fails on Linux.
-
-To get working code on the first attempt, follow these two steps:
-1. **Copy our Master AI Prompt** below (which provides the model with complete specification rules).
-2. **Describe your idea** by answering 4 straightforward questions.
+> **Connect any AI Agent to automatically build, test, and install plugins for your deck!**  
+> Uzlinux Studio provides native support for autonomous AI coding agents (Antigravity, Claude Code, Cursor, GitHub Copilot, Roo Code, Aider, etc.) through structured instructions (`AGENT.md`), Agent Skills (`skills/uzlinux-plugin-creator`), and automated scaffolding tools.
 
 ---
 
-## 2. Planning Checklist: The 4 Questions
+## 🤖 1. Connecting an AI Agent to Build Plugins
 
-Before prompting the AI, jot down the answers to these 4 questions:
+Instead of manually writing code or copying and pasting snippets, you can have your AI agent autonomously scaffold, program, validate, and install plugins directly into Uzlinux Studio.
 
-### Question 1: What should the button do?
-* *Example A:* "I want to display current Bitcoin and USD exchange rates on the key display."
-* *Example B:* "I want a button that toggles play/pause on Spotify and shows the song title."
-* *Example C:* "I want a button to trigger a webhook to toggle my smart lamp."
-* *Example D:* "I want a button that takes a full screenshot and saves it to my Pictures folder."
+### Option A: Antigravity / Gemini Agents (Agent Skill)
+Uzlinux Studio includes a dedicated skill at [`skills/uzlinux-plugin-creator/SKILL.md`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/skills/uzlinux-plugin-creator/SKILL.md).
 
-### Question 2: What should appear on the button display?
-* *Text:* Dynamic text (e.g. "$ 65,000", "Playing", "ON / OFF").
-* *Image/Icon:* A static icon or one that changes color depending on state.
+When running an agent in this workspace or with the skill activated, simply tell the AI:
+> *"Create a plugin for Uzlinux Studio that queries the current weather in London and updates the button every 10 minutes."*
 
-### Question 3: What happens when you press the button?
-* Does it trigger an action? (e.g. mute mic, skip track, perform backup).
-* Does it force a data refresh? (e.g. fetch newest prices immediately).
-
-### Question 4: Does the user need configuration fields?
-* Does it require an API key?
-* Does it require typing an IP address or URL?
+The agent will:
+1. Run `python3 scripts/create_plugin.py` to generate the plugin package.
+2. Implement the API logic and error handling in `main.py`.
+3. Validate the package with `python3 scripts/validate_plugin.py`.
+4. Install it into `~/.config/uzlinux-studio/plugins/`.
 
 ---
 
-## 3. The Master AI Prompt (Copy & Paste)
+### Option B: Claude Code / Cursor / Windsurf / Copilot (`AGENT.md` & `CLAUDE.md`)
+The repository contains universal agent instructions in [`AGENT.md`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/AGENT.md) and [`CLAUDE.md`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/CLAUDE.md).
 
-Copy the prompt block below, fill in your answers in the `[CUSTOMIZATION DETAILS]` section, and submit it to your AI:
+When opening the project in **Cursor**, **Windsurf**, or running **Claude Code** (`claude` in terminal), the agent automatically reads `AGENT.md` and gains full understanding of:
+- The WebSocket communication protocol.
+- The `manifest.json` schema.
+- Built-in scaffolding tools.
+- Installation paths.
 
-```markdown
-You are an expert Linux software engineer developing a native plugin for "Uzlinux Studio", a Stream Controller desktop application running on Linux.
+Just ask:
+> *"Build and install a plugin called CryptoTicker that shows BTC and ETH prices on key press."*
 
-I want you to generate a complete, working plugin.
+---
 
-MY PLUGIN REQUIREMENTS:
-- Purpose: [INSERT ANSWER TO QUESTION 1]
-- Button Display: [INSERT ANSWER TO QUESTION 2]
-- On Key Press: [INSERT ANSWER TO QUESTION 3]
-- Settings required: [INSERT ANSWER TO QUESTION 4]
+### Option C: Standalone Command-Line Tool (`scripts/create_plugin.py`)
+You or any script/agent can generate a ready-to-run plugin in 1 second:
 
-TECHNICAL SPECIFICATIONS YOU MUST STRICTLY FOLLOW:
-1. Language: Python 3 with asyncio and websockets (or single-file Python standard library).
-2. Folder structure: The plugin must be placed in a directory ending with `.sdPlugin`, e.g.:
-   com.mycompany.myaction.sdPlugin/
-   ├── manifest.json
-   └── main.py (with chmod +x)
-3. Command Line Arguments: Uzlinux Studio executes the plugin passing:
-   ./main.py -port <PORT> -pluginUUID <UUID> -registerEvent registerPlugin -info '<JSON>'
-4. Protocol:
-   - Connect immediately to ws://127.0.0.1:<PORT>
-   - Send handshake message: {"event": "registerPlugin", "uuid": "<PLUGIN_UUID>"}
-   - Listen for "willAppear" event: store payload context to update that button
-   - Listen for "willDisappear" event: remove context to stop updating
-   - Listen for "keyDown" event: trigger action
-   - Update button display by sending:
-     {"event": "setTitle", "context": context, "payload": {"title": "Line1\nLine2"}}
-5. Robustness:
-   - Must not crash on connection errors; handle exceptions gracefully.
-   - Include `#!/usr/bin/env python3` at the top of main.py.
+```bash
+python3 scripts/create_plugin.py \
+  --id com.myname.myaction \
+  --name "My Action Name" \
+  --author "Your Name" \
+  --category "Custom Tools"
+```
 
-Provide the complete `manifest.json` file and the full `main.py` code.
+This immediately creates a fully configured plugin in:
+```bash
+~/.config/uzlinux-studio/plugins/com.myname.myaction.sdPlugin/
+├── manifest.json
+├── main.py (chmod +x)
+├── assets/ (icon.svg, action.svg)
+└── property_inspector/ (pi.html)
 ```
 
 ---
 
-## 4. How to Install the Generated Plugin on Linux
+### Option D: Web AIs (ChatGPT, Claude Web, Gemini Web)
+If you are using a web chat without file access, provide the contents of [`AGENT.md`](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/AGENT.md) as the system prompt or project instruction.
 
-Once the AI generates your plugin files:
+---
 
-1. Open your terminal and create the plugin directory:
-   ```bash
-   mkdir -p ~/.config/uzlinux-studio/plugins/com.myname.myaction.sdPlugin
-   cd ~/.config/uzlinux-studio/plugins/com.myname.myaction.sdPlugin
-   ```
+## 🛠️ 2. Validating Your Plugin
 
-2. Save the files generated by the AI:
-   - Save `manifest.json`
-   - Save `main.py`
+To verify that any plugin is 100% compliant before opening Uzlinux Studio:
 
-3. Grant execution permissions to your script:
-   ```bash
-   chmod +x main.py
-   ```
+```bash
+python3 scripts/validate_plugin.py ~/.config/uzlinux-studio/plugins/com.myname.myaction.sdPlugin
+```
 
-4. Install Python websockets dependency if needed:
-   ```bash
-   pip3 install websockets
-   ```
+Checks performed:
+- [x] Folder naming convention (`.sdPlugin`).
+- [x] `manifest.json` syntax and mandatory fields (`Name`, `PluginUUID`, `Actions`, `CodePathLin`).
+- [x] Executable permissions (`chmod +x`).
+- [x] Valid controllers (`Keypad` / `Encoder`).
 
-5. Open **Uzlinux Studio**:
-   Your action will automatically appear in the Action Palette in the left sidebar!
+---
+
+## 📂 3. Useful Links
+
+- 🛠️ [Universal Agent Prompt & Directives (`AGENT.md`)](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/AGENT.md)
+- 🧠 [Plugin Creator Agent Skill (`skills/uzlinux-plugin-creator/SKILL.md`)](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/skills/uzlinux-plugin-creator/SKILL.md)
+- 📘 [Technical Plugin Development Specification](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/docs/PLUGIN_DEVELOPMENT_GUIDE.md)
+- 🚀 [Scaffolder Script (`scripts/create_plugin.py`)](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/scripts/create_plugin.py)
+- 🔍 [Validator Script (`scripts/validate_plugin.py`)](file:///home/lucastiago/Documentos/Projetos/Rust/UzlinuxStudioDeck/scripts/validate_plugin.py)
